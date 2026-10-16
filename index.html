@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NETLAB, plataforma educativa de fundamentos de redes desarrollada para la Universidad Santo Tomás, Seccional Villavicencio.">
+  <meta name="theme-color" content="#242424">
+  <title>NETLAB | Fundamentos de Redes</title>
+  <script>
+    (function () {
+      var cut = 'first';
+      try { cut = JSON.parse(localStorage.getItem('netlab:cut')) || 'first'; } catch (e) {}
+      var secondIds = ['rj45', 'encapsulamiento', 'taller-dhcp', 'seguridad'];
+      var firstIds = ['fundamentos', 'topologias', 'dispositivos', 'mac', 'medios', 'cableado', 'flujo', 'ipv4', 'laboratorio'];
+      var id = (location.hash || '').replace('#', '').replace(/^laboratorio-paso-.*/, 'laboratorio');
+      if (secondIds.indexOf(id) > -1) cut = 'second';
+      else if (firstIds.indexOf(id) > -1) cut = 'first';
+      document.documentElement.setAttribute('data-cut', cut === 'second' ? 'second' : 'first');
+    })();
+  </script>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/enhancements.css">
+  <script defer src="js/data.js"></script>
+  <script defer src="js/quiz.js"></script>
+  <script defer src="js/script.js"></script>
+  <script defer src="js/enhancements.js"></script>
+  <script defer src="js/mac.js"></script>
+  <script defer src="js/talleres.js"></script>
+  <script defer src="js/video.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+  <div class="reading-progress" aria-hidden="true"><span data-reading-progress></span></div>
+
+  <header class="site-header" data-header>
+    <a class="brand" href="#inicio" aria-label="NETLAB, volver al inicio">
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 34 34"><path d="M6 24V10l11 14V10M17 24l11-14v14"/></svg>
+      </span>
+      <span class="brand__text">NETLAB</span>
+    </a>
+
+    <div class="header-topic" aria-live="polite">
+      <span class="header-topic__label">Tema actual</span>
+      <span class="header-topic__value" data-current-topic>Inicio</span>
+    </div>
+
+    <div class="segmented cut-switch" role="group" aria-label="Corte académico" data-cut-switch>
+      <button type="button" data-cut-select="first" aria-pressed="true" class="is-active">Corte 1</button>
+      <button type="button" data-cut-select="second" aria-pressed="false">Corte 2</button>
+    </div>
+
+    <button class="menu-toggle" type="button" data-menu-button aria-expanded="false" aria-controls="main-menu" aria-label="Abrir menú de capítulos">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <div class="menu-overlay" data-menu-overlay hidden></div>
+  <aside class="menu-panel" id="main-menu" data-menu-panel aria-label="Navegación por capítulos">
+    <div class="menu-panel__head">
+      <div>
+        <span class="eyebrow eyebrow--light">Recorrido educativo</span>
+        <p class="menu-panel__title">Fundamentos de Redes</p>
+      </div>
+      <button class="icon-button icon-button--light" type="button" data-menu-close aria-label="Cerrar menú">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="segmented segmented--dark cut-switch cut-switch--menu" role="group" aria-label="Corte académico" data-cut-switch>
+      <button type="button" data-cut-select="first" aria-pressed="true" class="is-active">Primer corte</button>
+      <button type="button" data-cut-select="second" aria-pressed="false">Segundo corte</button>
+    </div>
+
+    <nav class="chapter-nav" aria-label="Capítulos de NETLAB">
+      <a href="#inicio" data-nav-link data-cut="both"><span>00</span> Inicio</a>
+      <a href="#fundamentos" data-nav-link data-cut="first"><span>01</span> Fundamentos</a>
+      <a href="#topologias" data-nav-link data-cut="first"><span>02</span> Topologías</a>
+      <a href="#dispositivos" data-nav-link data-cut="first"><span>03</span> Dispositivos</a>
+      <a href="#medios" data-nav-link data-cut="first"><span>04</span> Medios</a>
+      <a href="#cableado" data-nav-link data-cut="first"><span>05</span> Cableado UTP</a>
+      <a href="#flujo" data-nav-link data-cut="first"><span>06</span> Flujo de paquetes</a>
+      <a href="#ipv4" data-nav-link data-cut="first"><span>07</span> Direccionamiento IPv4</a>
+      <a href="#laboratorio" data-nav-link data-cut="first"><span>08</span> Packet Tracer</a>
+      <a href="#rj45" data-nav-link data-cut="second"><span>01</span> Constructor RJ-45</a>
+      <a href="#encapsulamiento" data-nav-link data-cut="second"><span>02</span> Encapsulamiento y PDU</a>
+      <a href="#taller-dhcp" data-nav-link data-cut="second"><span>02</span> Taller DHCP</a>
+      <a href="#seguridad" data-nav-link data-cut="second"><span>03</span> Seguridad de la red</a>
+      <a href="#conclusiones" data-nav-link data-cut="both"><span>09</span> Conclusiones</a>
+      <a href="#evaluacion" data-nav-link data-cut="both"><span>10</span> Evaluación</a>
+      <a href="#glosario" data-nav-link data-cut="both"><span>11</span> Glosario</a>
+      <a href="#cierre" data-nav-link data-cut="both"><span>12</span> Cierre y fuentes</a>
+    </nav>
+
+    <div class="menu-progress" data-menu-progress aria-label="Progreso del recorrido">
+      <div class="menu-progress__text"><span>Tu recorrido</span><b data-menu-progress-text>0 / 15</b></div>
+      <div class="menu-progress__bar"><span data-menu-progress-bar></span></div>
+    </div>
+
+    <div class="menu-panel__meta">
+      <p>Universidad Santo Tomás</p>
+      <p>Seccional Villavicencio · Redes · 2026</p>
+    </div>
+  </aside>
+
+  <main id="main-content">
+    <!-- ==============================
+         Portada
+    ================================= -->
+    <section class="hero" id="inicio" data-nav-title="Inicio" data-cut="both">
+      <canvas class="hero__network" data-hero-network aria-hidden="true"></canvas>
+      <div class="hero__grid">
+        <div class="hero__content" data-reveal>
+          <p class="hero__kicker">Universidad Santo Tomás · Seccional Villavicencio</p>
+          <div class="hero__rule" aria-hidden="true"></div>
+          <h1>Fundamentos de <span>Redes</span></h1>
+          <p class="hero__lead">Una plataforma educativa para comprender cómo se conectan los dispositivos, cómo viajan los datos y cómo se construye una red desde la teoría hasta Cisco Packet Tracer.</p>
+
+          <div class="hero__academic" aria-label="Información académica">
+            <div><span>Materia</span><strong>Redes</strong></div>
+            <div><span>Docente</span><strong>Omar Camilo Santiago</strong></div>
+            <div><span>Integrantes</span><strong>Juan José Montoya Garzón<br>Santiago Saray Quevedo</strong></div>
+          </div>
+
+          <div class="hero__actions">
+            <button class="button button--primary" type="button" data-scroll-target="fundamentos">Comenzar recorrido</button>
+            <a class="text-link" href="#laboratorio">Ir al laboratorio <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+
+        <div class="hero__visual hero__visual--video" data-reveal data-delay="120">
+          <!-- Video destacado: visible en la portada sin necesidad de entrar a otro capítulo. -->
+          <article class="featured-video" aria-labelledby="featured-video-title">
+            <div class="featured-video__topline">
+              <span>Práctica académica · T568B</span>
+              <span>NETLAB · VIDEO</span>
+            </div>
+            <h2 id="featured-video-title">Ponchado de cable UTP con T568B</h2>
+            <p class="featured-video__description">En este video mostramos cómo preparar un cable UTP, ordenar sus ocho hilos según el estándar T568B y ponchar un conector RJ-45. Al finalizar, verificamos el cable y explicamos por qué importa el trenzado y cuándo se usan los cables directos y cruzados.</p>
+            <p class="featured-video__steps" aria-label="Etapas de la práctica">Preparación <span aria-hidden="true">→</span> Ordenamiento <span aria-hidden="true">→</span> Ponchado <span aria-hidden="true">→</span> Verificación</p>
+            <div class="featured-video__player" data-video data-video-id="G1w7-xRyzm4">
+              <button class="video-facade" type="button" data-video-play aria-label="Reproducir el video: Ponchado de cable UTP con T568B">
+                <img class="video-facade__thumb" data-video-thumb src="https://i.ytimg.com/vi/G1w7-xRyzm4/hqdefault.jpg" alt="" loading="eager" decoding="async">
+                <span class="video-facade__shade" aria-hidden="true"></span>
+                <span class="video-facade__play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>
+                <span class="video-facade__label">Ver la práctica · T568B</span>
+              </button>
+            </div>
+            <div class="featured-video__footer">
+              <span data-video-note>Requiere conexión a Internet</span>
+              <a href="https://youtu.be/G1w7-xRyzm4" target="_blank" rel="noopener noreferrer" aria-label="Abrir el video en YouTube en otra pestaña">Abrir en YouTube <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+          <!-- Conservamos la ilustración original de la portada, en formato compacto. -->
+          <div class="hero__visual-frame hero__visual-frame--compact" aria-label="Ilustración original de la red">
+            <img src="assets/illustrations/network-hero.svg" alt="Diagrama abstracto de una red con nodos interconectados" width="720" height="620" loading="lazy">
+            <div class="hero__visual-label hero__visual-label--top"><span>CAPA 2</span> MAC / Switch</div>
+            <div class="hero__visual-label hero__visual-label--right"><span>CAPA 3</span> IP / Router</div>
+            <div class="hero__visual-label hero__visual-label--bottom"><span>WLAN</span> IEEE 802.11</div>
+          </div>
+          <div class="hero__visual-index" aria-hidden="true">CCNA · 01</div>
+        </div>
+      </div>
+
+      <a class="scroll-cue" href="#fundamentos">
+        <span>Explorar contenido</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg>
+      </a>
+    </section>
+
+    <!-- ==============================
+         Selector de corte
+    ================================= -->
+    <section class="cuts" id="cortes" data-nav-title="Elegir corte" data-cut="both" aria-labelledby="cuts-title">
+      <div class="cuts__shell">
+        <header class="cuts__head" data-reveal>
+          <span class="eyebrow">Contenido por cortes</span>
+          <h2 id="cuts-title">Elige el corte que quieres estudiar</h2>
+          <p>El material está organizado según lo trabajado en cada corte académico. Cada uno tiene sus propios capítulos, evaluación, glosario y fuentes.</p>
+        </header>
+        <div class="cuts__grid">
+          <article class="cut-card" data-cut-card="first" data-reveal>
+            <div class="cut-card__top"><span class="cut-card__n">01</span><span class="cut-card__badge">8 capítulos</span></div>
+            <h3>Primer corte</h3>
+            <p>Fundamentos de redes, dispositivos, medios de transmisión, cableado, direccionamiento y práctica en Packet Tracer.</p>
+            <ul>
+              <li>Fundamentos y tipos de red</li><li>Topologías</li><li>Dispositivos y direcciones MAC</li><li>Medios de transmisión</li><li>Cableado UTP y categorías</li><li>Flujo de paquetes</li><li>Direccionamiento IPv4</li><li>Laboratorio guiado en Packet Tracer</li>
+            </ul>
+            <button class="button button--primary" type="button" data-cut-select="first">Estudiar el primer corte</button>
+          </article>
+          <article class="cut-card" data-cut-card="second" data-reveal data-delay="100">
+            <div class="cut-card__top"><span class="cut-card__n">02</span><span class="cut-card__badge">4 capítulos</span></div>
+            <h3>Segundo corte</h3>
+            <p>Ponchado de cable con T568A y T568B, encapsulamiento y PDU, el taller de dos redes con DHCP y la seguridad de la infraestructura de red.</p>
+            <ul>
+              <li>Constructor RJ-45 (T568A y T568B)</li><li>Encapsulamiento, PDU y desencapsulamiento</li><li>Taller: dos redes conectadas con DHCP</li><li>Seguridad en la infraestructura de red</li>
+            </ul>
+            <button class="button button--primary" type="button" data-cut-select="second">Estudiar el segundo corte</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================
+         01 Fundamentos
+    ================================= -->
+    <section class="chapter chapter--light" id="fundamentos" data-cut="first" data-nav-title="Fundamentos">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">01</div>
+          <div>
+            <span class="eyebrow">De la conexión local a Internet</span>
+            <h2>Fundamentos de las redes</h2>
+            <p>Las redes evolucionaron desde sistemas experimentales de conmutación de paquetes hasta una infraestructura global basada en protocolos comunes, Ethernet, Wi-Fi, fibra óptica y servicios en la nube.</p>
+          </div>
+        </header>
+
+        <div class="history-layout">
+          <ol class="timeline" aria-label="Evolución histórica de las redes">
+            <li data-reveal>
+              <span class="timeline__year">1960s</span>
+              <div><h3>ARPANET</h3><p>Primera red de conmutación de paquetes orientada a conectar universidades e investigación.</p></div>
+            </li>
+            <li data-reveal data-delay="70">
+              <span class="timeline__year">1980s</span>
+              <div><h3>TCP/IP y Ethernet</h3><p>La estandarización de TCP/IP y Ethernet facilita la comunicación entre equipos y el crecimiento de las LAN.</p></div>
+            </li>
+            <li data-reveal data-delay="140">
+              <span class="timeline__year">1990s</span>
+              <div><h3>World Wide Web</h3><p>Internet se abre al uso comercial y crecen las redes empresariales y domésticas.</p></div>
+            </li>
+            <li data-reveal data-delay="210">
+              <span class="timeline__year">2000s+</span>
+              <div><h3>Era inalámbrica y cloud</h3><p>Wi-Fi, redes móviles, fibra óptica y arquitectura en la nube consolidan la interconexión global.</p></div>
+            </li>
+          </ol>
+
+          <aside class="insight-block" data-reveal>
+            <span class="insight-block__label">Idea central</span>
+            <p>Los protocolos estándar hicieron posible que dispositivos diferentes pudieran comunicarse de forma transparente dentro de una misma infraestructura.</p>
+            <div class="insight-block__signal" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          </aside>
+        </div>
+
+        <div class="section-divider" aria-hidden="true"><span></span><b>TIPOS DE RED</b><span></span></div>
+
+        <div class="network-types" data-reveal>
+          <div class="network-types__tabs" role="tablist" aria-label="Tipos de red por alcance">
+            <button type="button" role="tab" data-network-type="lan">LAN</button>
+            <button type="button" role="tab" data-network-type="wlan">WLAN</button>
+            <button type="button" role="tab" data-network-type="man">MAN</button>
+            <button type="button" role="tab" data-network-type="wan">WAN</button>
+          </div>
+
+          <div class="network-types__panel" data-network-panel data-active-type="lan" role="tabpanel" tabindex="0">
+            <div class="network-types__scale" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="network-types__intro">
+              <strong data-type-short>LAN</strong>
+              <div>
+                <h3 data-type-title>Red de Área Local</h3>
+                <p data-type-description></p>
+              </div>
+            </div>
+            <dl class="spec-grid">
+              <div><dt>Alcance</dt><dd data-type-range></dd></div>
+              <div><dt>Velocidad típica</dt><dd data-type-speed></dd></div>
+              <div><dt>Medio principal</dt><dd data-type-medium></dd></div>
+              <div><dt>Caso de uso</dt><dd data-type-use></dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#inicio">← Portada</a><a href="#topologias">Topologías →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         02 Topologías
+    ================================= -->
+    <section class="chapter chapter--ink" id="topologias" data-cut="first" data-nav-title="Topologías">
+      <div class="chapter__shell">
+        <header class="chapter-heading chapter-heading--light" data-reveal>
+          <div class="chapter-heading__index">02</div>
+          <div>
+            <span class="eyebrow eyebrow--light">Estructura y flujo</span>
+            <h2>Topologías físicas y lógicas</h2>
+            <p>La topología física describe la disposición real de cables y nodos. La topología lógica explica cómo se desplaza la información, independientemente de esa disposición física.</p>
+          </div>
+        </header>
+
+        <div class="topology-explorer" data-reveal>
+          <div class="topology-toolbar">
+            <div class="segmented segmented--dark" aria-label="Seleccionar topología">
+              <button type="button" class="is-active" data-topology-button="star" aria-pressed="true">Estrella</button>
+              <button type="button" data-topology-button="mesh" aria-pressed="false">Malla</button>
+            </div>
+            <div class="topology-actions">
+              <button type="button" class="chip-button" data-topology-send>Enviar paquete</button>
+              <button type="button" class="chip-button" data-topology-fail aria-pressed="false">Simular fallo</button>
+              <button type="button" class="chip-button" data-topology-reset>Restablecer</button>
+            </div>
+          </div>
+          <p class="topology-status" data-topology-status aria-live="polite">Haz clic en un equipo de origen y luego en uno de destino.</p>
+
+          <div class="topology-stage">
+            <div class="topology-view" data-topology-view="star">
+              <svg viewBox="0 0 620 420" role="img" aria-labelledby="star-title star-desc">
+                <title id="star-title">Topología en estrella</title>
+                <desc id="star-desc">Cinco computadores conectados a un switch central.</desc>
+                <g class="topology-links"><path d="M310 210L110 90M310 210L510 90M310 210L90 320M310 210L530 320M310 210L310 370"/></g>
+                <g class="topology-node topology-node--center"><rect x="258" y="178" width="104" height="64" rx="7"/><text x="310" y="214">SWITCH</text></g>
+                <g class="topology-node"><rect x="62" y="58" width="96" height="60" rx="7"/><text x="110" y="94">PC1</text></g>
+                <g class="topology-node"><rect x="462" y="58" width="96" height="60" rx="7"/><text x="510" y="94">PC2</text></g>
+                <g class="topology-node"><rect x="42" y="290" width="96" height="60" rx="7"/><text x="90" y="326">PC3</text></g>
+                <g class="topology-node"><rect x="482" y="290" width="96" height="60" rx="7"/><text x="530" y="326">PC4</text></g>
+                <g class="topology-node"><rect x="262" y="340" width="96" height="60" rx="7"/><text x="310" y="376">PC5</text></g>
+              </svg>
+              <div class="topology-copy"><span>La utilizada en el taller</span><h3>Estrella</h3><p>Los equipos se conectan a un switch central. El taller práctico usa un Cisco 2960 para interconectar cinco estaciones de trabajo.</p></div>
+            </div>
+
+            <div class="topology-view" data-topology-view="mesh" hidden>
+              <svg viewBox="0 0 620 420" role="img" aria-labelledby="mesh-title mesh-desc">
+                <title id="mesh-title">Topología en malla</title>
+                <desc id="mesh-desc">Cinco nodos con conexiones redundantes entre sí.</desc>
+                <g class="topology-links"><path d="M310 55L105 170L180 360L440 360L515 170L310 55ZM105 170L440 360M515 170L180 360M105 170L515 170M180 360L310 55M440 360L310 55"/></g>
+                <g class="topology-dot"><circle cx="310" cy="55" r="34"/><circle cx="105" cy="170" r="34"/><circle cx="515" cy="170" r="34"/><circle cx="180" cy="360" r="34"/><circle cx="440" cy="360" r="34"/></g>
+                <g class="topology-dot-labels" aria-hidden="true"><text x="310" y="60">N1</text><text x="105" y="175">N2</text><text x="515" y="175">N3</text><text x="180" y="365">N4</text><text x="440" y="365">N5</text></g>
+              </svg>
+              <div class="topology-copy"><span>Redundancia</span><h3>Malla</h3><p>Los nodos disponen de conexiones redundantes. El material la destaca por su mayor tolerancia a fallos.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="concept-pair" data-reveal>
+          <article><span>FÍSICA</span><h3>¿Qué está conectado?</h3><p>Describe la disposición real de dispositivos, puertos, cables y nodos.</p></article>
+          <div class="concept-pair__connector" aria-hidden="true"></div>
+          <article><span>LÓGICA</span><h3>¿Cómo viajan los datos?</h3><p>Describe el recorrido de la información independientemente de la forma física.</p></article>
+        </div>
+
+        <nav class="chapter-pager chapter-pager--dark" aria-label="Navegación entre capítulos"><a href="#fundamentos">← Fundamentos</a><a href="#dispositivos">Dispositivos →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         03 Dispositivos
+    ================================= -->
+    <section class="chapter" id="dispositivos" data-cut="first" data-nav-title="Dispositivos">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">03</div>
+          <div>
+            <span class="eyebrow">Infraestructura de red</span>
+            <h2>Cada dispositivo cumple una función distinta</h2>
+            <p>Hosts y servidores generan o procesan información. Los switches trabajan con tramas y direcciones MAC dentro de la LAN; los routers encaminan paquetes mediante IP; los access points incorporan movilidad inalámbrica.</p>
+          </div>
+        </header>
+
+        <div class="device-lab" data-reveal>
+          <div class="device-map" aria-label="Diagrama interactivo de dispositivos de red">
+            <div class="device-wire device-wire--1"></div>
+            <div class="device-wire device-wire--2"></div>
+            <div class="device-wire device-wire--3"></div>
+            <div class="device-wire device-wire--4"></div>
+            <div class="device-wire device-wire--5"></div>
+
+            <button class="device-node device-node--host" type="button" data-device="host" aria-pressed="false"><span class="device-node__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span><span>Host</span></button>
+            <button class="device-node device-node--switch" type="button" data-device="switch" aria-pressed="true"><span class="device-node__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h.01M11 12h.01M15 12h.01M19 12h.01"/></svg></span><span>Switch</span></button>
+            <button class="device-node device-node--router" type="button" data-device="router" aria-pressed="false"><span class="device-node__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 8h8M8 16h8M8 8l2-2M8 8l2 2M16 16l-2-2M16 16l-2 2"/></svg></span><span>Router</span></button>
+            <button class="device-node device-node--server" type="button" data-device="server" aria-pressed="false"><span class="device-node__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="7" rx="2"/><rect x="4" y="14" width="16" height="7" rx="2"/><path d="M8 6h.01M8 17h.01"/></svg></span><span>Servidor</span></button>
+            <button class="device-node device-node--ap" type="button" data-device="ap" aria-pressed="false"><span class="device-node__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.6a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 20h.01"/></svg></span><span>Access Point</span></button>
+          </div>
+
+          <article class="device-panel" data-device-panel aria-live="polite">
+            <span class="device-panel__label">Selecciona un dispositivo</span>
+            <h3 data-device-title>Switch</h3>
+            <dl>
+              <div><dt>Capa / contexto</dt><dd data-device-layer></dd></div>
+              <div><dt>Direccionamiento</dt><dd data-device-addressing></dd></div>
+              <div><dt>Función</dt><dd data-device-role></dd></div>
+            </dl>
+            <p data-device-detail></p>
+          </article>
+        </div>
+
+        <div class="server-services" data-reveal>
+          <div class="server-services__lead"><span class="eyebrow">Servicios de servidor</span><h3>Tres servicios que sostienen la experiencia del usuario</h3></div>
+          <div class="service-line">
+            <article><b>DHCP</b><span>Asignación dinámica</span><p>IP + máscara + gateway.</p></article>
+            <article><b>DNS</b><span>Resolución de nombres</span><p>Dominio → dirección IP.</p></article>
+            <article><b>HTTP / HTTPS</b><span>Servicio web</span><p>Entrega páginas al navegador.</p></article>
+          </div>
+        </div>
+
+        <div class="mac-lab" id="mac" data-reveal data-mac-lab>
+          <div class="mac-lab__intro">
+            <span class="eyebrow">Direcciones MAC</span>
+            <h3>La identidad física de cada interfaz de red</h3>
+            <p>Una dirección MAC identifica a una tarjeta o interfaz de red dentro de su enlace local. Tiene 48 bits, escritos como 12 dígitos hexadecimales. Los switches la usan en Capa 2 para decidir por qué puerto reenviar cada trama, mientras que ARP ayuda a relacionar una IP con su MAC.</p>
+            <div class="mac-format" role="group" aria-label="Estructura de una dirección MAC">
+              <div class="mac-format__bytes" aria-hidden="true">
+                <span class="is-oui">00</span><i>:</i><span class="is-oui">1A</span><i>:</i><span class="is-oui">2B</span><i>:</i><span class="is-nic">3C</span><i>:</i><span class="is-nic">4D</span><i>:</i><span class="is-nic">5E</span>
+              </div>
+              <div class="mac-format__legend">
+                <span class="is-oui"><b>OUI · 3 bytes</b> Identifica al fabricante</span>
+                <span class="is-nic"><b>NIC · 3 bytes</b> Identifica la interfaz</span>
+              </div>
+              <p class="mac-format__sr">Ejemplo: 00:1A:2B:3C:4D:5E. Los tres primeros bytes son el OUI del fabricante y los tres últimos identifican la interfaz.</p>
+            </div>
+          </div>
+
+          <div class="mac-sim">
+            <div class="mac-sim__head">
+              <div><span class="eyebrow">Simulador</span><h4>Cómo aprende un switch</h4></div>
+              <div class="mac-sim__controls">
+                <label>Origen <select data-mac-src><option value="a" selected>PC-A</option><option value="b">PC-B</option><option value="c">PC-C</option><option value="d">PC-D</option></select></label>
+                <label>Destino <select data-mac-dst><option value="a">PC-A</option><option value="b" selected>PC-B</option><option value="c">PC-C</option><option value="d">PC-D</option></select></label>
+                <button class="button button--primary button--compact" type="button" data-mac-send>Enviar trama</button>
+                <button class="button button--ghost button--compact" type="button" data-mac-reset>Vaciar tabla</button>
+              </div>
+            </div>
+
+            <div class="mac-sim__body">
+              <svg class="mac-sim__svg" viewBox="0 0 620 320" role="img" aria-label="Un switch conectado a cuatro computadores PC-A, PC-B, PC-C y PC-D">
+                <g class="mac-links" data-mac-links></g>
+                <g class="mac-switch"><rect x="250" y="30" width="120" height="58" rx="7"/><text x="310" y="64">SWITCH</text></g>
+                <g data-mac-pcs></g>
+                <g data-mac-tokens></g>
+              </svg>
+
+              <div class="mac-table" aria-live="polite">
+                <div class="mac-table__title"><span>Tabla CAM / MAC</span><b data-mac-count>0 entradas</b></div>
+                <table>
+                  <thead><tr><th>Puerto</th><th>Dirección MAC</th></tr></thead>
+                  <tbody data-mac-rows><tr class="is-empty"><td colspan="2">Vacía: el switch todavía no conoce a nadie.</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+
+            <p class="mac-sim__status" data-mac-status aria-live="polite">Elige origen y destino, y envía una trama. Empieza por la primera: la tabla está vacía.</p>
+          </div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#topologias">← Topologías</a><a href="#medios">Medios →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         04 Medios
+    ================================= -->
+    <section class="chapter chapter--soft" id="medios" data-cut="first" data-nav-title="Medios de transmisión">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">04</div>
+          <div>
+            <span class="eyebrow">El canal por donde viajan los bits</span>
+            <h2>Medios de transmisión</h2>
+            <p>Un medio de transmisión es el canal físico o inalámbrico por el que viajan los datos como señales eléctricas, luminosas o electromagnéticas entre un emisor y un receptor.</p>
+          </div>
+        </header>
+
+        <div class="media-principles" data-reveal>
+          <article><span>01</span><h3>Distancia</h3><p>Longitud máxima que puede recorrer la señal sin degradarse.</p></article>
+          <article><span>02</span><h3>Ancho de banda</h3><p>Cantidad de datos que el medio puede transportar por segundo.</p></article>
+          <article><span>03</span><h3>Inmunidad al ruido</h3><p>Resistencia frente a interferencias electromagnéticas.</p></article>
+        </div>
+
+        <div class="media-classification" data-reveal>
+          <div class="media-classification__side">
+            <span class="eyebrow">Clasificación</span>
+            <h3>Guiados y no guiados</h3>
+            <p>En los medios guiados, la señal queda confinada en un conductor físico. En los no guiados, se propaga por el aire mediante ondas.</p>
+          </div>
+          <div class="media-paths">
+            <div class="media-path"><span>GUIADOS</span><strong>UTP / STP</strong><strong>Coaxial</strong><strong>Fibra óptica</strong></div>
+            <div class="media-path"><span>NO GUIADOS</span><strong>Wi-Fi</strong><strong>Bluetooth</strong><strong>Microondas / Satélite</strong></div>
+          </div>
+        </div>
+
+        <div class="media-comparator" data-reveal>
+          <div class="media-comparator__head">
+            <div><span class="eyebrow">Comparador aplicado</span><h3>¿Qué medio conviene según el escenario?</h3></div>
+            <div class="scenario-buttons" aria-label="Escenarios de comparación">
+              <button type="button" data-scenario="home">Casa / oficina</button>
+              <button type="button" data-scenario="campus">Campus</button>
+              <button type="button" data-scenario="city">Entre ciudades</button>
+              <button type="button" data-scenario="mobility">Movilidad</button>
+            </div>
+          </div>
+
+          <div class="medium-row">
+            <article class="medium-profile" data-medium="utp">
+              <span class="medium-profile__badge" data-medium-badge hidden>Recomendado</span>
+              <div class="medium-profile__symbol medium-profile__symbol--copper" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <h4>UTP</h4><p>Hasta 10 Gbps · 100 m</p><dl><div><dt>Costo</dt><dd>Bajo</dd></div><div><dt>EMI</dt><dd>Susceptible</dd></div><div><dt>Movilidad</dt><dd>Nula</dd></div></dl>
+            </article>
+            <article class="medium-profile" data-medium="fiber">
+              <span class="medium-profile__badge" data-medium-badge hidden>Recomendado</span>
+              <div class="medium-profile__symbol medium-profile__symbol--fiber" aria-hidden="true"><i></i></div>
+              <h4>Fibra óptica</h4><p>Gbps–Tbps · decenas de km</p><dl><div><dt>Costo</dt><dd>Alto</dd></div><div><dt>EMI</dt><dd>Inmune</dd></div><div><dt>Movilidad</dt><dd>Nula</dd></div></dl>
+            </article>
+            <article class="medium-profile" data-medium="wireless">
+              <span class="medium-profile__badge" data-medium-badge hidden>Recomendado</span>
+              <div class="medium-profile__symbol medium-profile__symbol--wifi" aria-hidden="true"><i></i><i></i><i></i></div>
+              <h4>Inalámbrico</h4><p>Hasta ~9.6 Gbps teórico</p><dl><div><dt>Costo</dt><dd>Medio</dd></div><div><dt>EMI</dt><dd>Muy susceptible</dd></div><div><dt>Movilidad</dt><dd>Total</dd></div></dl>
+            </article>
+          </div>
+
+          <div class="media-bars" data-media-bars aria-label="Comparación relativa e ilustrativa"></div>
+
+          <div class="scenario-explanation" aria-live="polite"><span data-scenario-label>Casa u oficina pequeña</span><p data-scenario-reason></p></div>
+        </div>
+
+        <div class="fiber-note" data-reveal>
+          <div class="fiber-note__diagram" aria-hidden="true"><div class="fiber-core"><span></span></div></div>
+          <div><span class="eyebrow">¿Sabías que?</span><h3>La fibra trabaja con luz, no con electricidad</h3><p>El material destaca que la fibra es inmune a interferencias electromagnéticas. La monomodo utiliza un núcleo aproximado de 9 μm y está orientada a largas distancias; la multimodo usa un núcleo mayor y se aplica en campus y centros de datos.</p></div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#dispositivos">← Dispositivos</a><a href="#cableado">Cableado UTP →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         05 Cableado
+    ================================= -->
+    <section class="chapter" id="cableado" data-cut="first" data-nav-title="Cableado UTP">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">05</div>
+          <div>
+            <span class="eyebrow">UTP · RJ-45 · TIA/EIA-568</span>
+            <h2>Del par trenzado al conector</h2>
+            <p>El cable UTP está formado por cuatro pares de cobre trenzados, sin blindaje metálico. El trenzado ayuda a reducir la diafonía y el conector RJ-45 dispone de ocho posiciones y ocho contactos.</p>
+          </div>
+        </header>
+
+        <div class="utp-categories" data-reveal>
+          <div class="utp-categories__head"><h3>Categorías estudiadas</h3><p>Cada categoría define frecuencia, velocidad máxima y uso recomendado.</p></div>
+          <div class="category-track" role="list" aria-label="Categorías de cable UTP">
+            <div role="listitem"><b>Cat 3</b><span>16 MHz</span><small>10 Mbps</small></div>
+            <div role="listitem"><b>Cat 5</b><span>100 MHz</span><small>100 Mbps</small></div>
+            <div role="listitem"><b>Cat 5e</b><span>100 MHz</span><small>1 Gbps</small></div>
+            <div role="listitem"><b>Cat 6</b><span>250 MHz</span><small>1–10 Gbps*</small></div>
+            <div role="listitem"><b>Cat 6a</b><span>500 MHz</span><small>10 Gbps</small></div>
+            <div role="listitem"><b>Cat 7</b><span>600 MHz</span><small>10 Gbps</small></div>
+          </div>
+          <p class="technical-note">*El material indica que Cat 6 alcanza 10 Gbps en distancias reducidas, aproximadamente 37–55 m.</p>
+        </div>
+
+        <div class="cable-decision" data-reveal data-cable-question>
+          <div class="cable-decision__prompt"><span>Pregunta rápida</span><h3>PC → Switch</h3><p>¿Qué tipo de cable utilizarías según el material?</p></div>
+          <div class="cable-decision__answers">
+            <button type="button" data-cable-answer="directo">Cable directo</button>
+            <button type="button" data-cable-answer="cruzado">Cable cruzado</button>
+            <p class="inline-feedback" data-cable-feedback hidden aria-live="polite"></p>
+            <button class="small-action" type="button" data-cable-reset>Reiniciar pregunta</button>
+          </div>
+        </div>
+
+        <div class="cable-rule" data-reveal>
+          <div><span>DIRECTO</span><strong>Mismo estándar en ambos extremos</strong><p>T568B ↔ T568B o T568A ↔ T568A. Se usa típicamente entre dispositivos diferentes.</p></div>
+          <div class="cable-rule__line" aria-hidden="true"></div>
+          <div><span>CRUZADO</span><strong>Estándares diferentes</strong><p>T568A ↔ T568B. El material lo asocia a dispositivos del mismo tipo; equipos modernos pueden usar Auto-MDIX.</p></div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#medios">← Medios</a><a href="#flujo">Flujo de paquetes →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         06 Flujo del paquete
+    ================================= -->
+    <section class="chapter chapter--ink" id="flujo" data-cut="first" data-nav-title="Flujo de paquetes">
+      <div class="chapter__shell">
+        <header class="chapter-heading chapter-heading--light" data-reveal>
+          <div class="chapter-heading__index">06</div>
+          <div>
+            <span class="eyebrow eyebrow--light">Extremo a extremo</span>
+            <h2>Sigue un paquete por la red</h2>
+            <p>El recorrido ayuda a conectar las capas: el host origina la solicitud, el switch conmuta en la LAN, el router decide mediante IP y el servidor procesa la petición.</p>
+          </div>
+        </header>
+
+        <div class="packet-simulator" data-reveal>
+          <div class="packet-route" aria-label="Recorrido del paquete desde host hasta servidor">
+            <div class="packet-node is-active" data-packet-node><span>01</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><b>Host</b></div>
+            <div class="packet-line" data-packet-line><i></i></div>
+            <div class="packet-node" data-packet-node><span>02</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h.01M11 12h.01M15 12h.01M19 12h.01"/></svg><b>Switch</b></div>
+            <div class="packet-line" data-packet-line><i></i></div>
+            <div class="packet-node" data-packet-node><span>03</span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 8h8M8 16h8"/></svg><b>Router</b></div>
+            <div class="packet-line" data-packet-line><i></i></div>
+            <div class="packet-node" data-packet-node><span>04</span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="7" rx="2"/><rect x="4" y="14" width="16" height="7" rx="2"/></svg><b>Servidor</b></div>
+          </div>
+
+          <div class="packet-console">
+            <div class="packet-console__status"><span>RECORRIDO</span><b data-packet-counter>1 / 4</b></div>
+            <h3 data-packet-title tabindex="-1">1. Host de origen</h3>
+            <p data-packet-body></p>
+            <div class="packet-controls">
+              <button type="button" data-packet-prev>Anterior</button>
+              <button type="button" class="button button--primary button--compact" data-packet-play data-playing="false">Reproducir</button>
+              <button type="button" data-packet-next>Siguiente</button>
+              <button type="button" class="small-action small-action--dark" data-packet-reset>Reiniciar</button>
+              <div class="speed-control" data-packet-speed role="group" aria-label="Velocidad de reproducción"><button type="button" data-speed="0.5" aria-pressed="false">0.5×</button><button type="button" data-speed="1" aria-pressed="true" class="is-active">1×</button><button type="button" data-speed="2" aria-pressed="false">2×</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="layer-strip" data-reveal>
+          <div><span>Host</span><strong>MAC + IP</strong></div>
+          <div><span>Switch</span><strong>Capa 2 / MAC</strong></div>
+          <div><span>Router</span><strong>Capa 3 / IP</strong></div>
+          <div><span>Servidor</span><strong>HTTP / DNS / DHCP</strong></div>
+        </div>
+
+        <nav class="chapter-pager chapter-pager--dark" aria-label="Navegación entre capítulos"><a href="#cableado">← Cableado UTP</a><a href="#encapsulamiento">Encapsulamiento →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         Constructor RJ-45 (segundo corte)
+    ================================= -->
+    <section class="chapter rj45-chapter" id="rj45" data-nav-title="Constructor RJ-45" data-cut="second">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">01</div>
+          <div>
+            <span class="eyebrow">Práctica de ponchado · TIA/EIA-568</span>
+            <h2>Ponchado de cable UTP con T568A y T568B</h2>
+            <p>Un cable UTP tiene cuatro pares de cobre trenzados y el conector RJ-45 tiene ocho posiciones. La práctica consiste en preparar el cable, ordenar los ocho hilos según el estándar, ponchar el conector y verificar el resultado. Aquí puedes ver el orden de cada norma y practicarlo.</p>
+          </div>
+        </header>
+
+        <div class="pinout-builder" data-reveal>
+          <div class="pinout-builder__content">
+            <span class="eyebrow">Constructor RJ-45</span>
+            <h3>Orden de conductores: <span data-standard-title>T568B</span></h3>
+            <p>Selecciona una norma y observa cómo cambia el orden. Cada hilo se muestra con su color real; los «blanco/…» llevan franja de color sobre fondo blanco.</p>
+            <div class="segmented">
+              <button type="button" data-pin-standard="a" aria-pressed="false">T568A</button>
+              <button type="button" class="is-active" data-pin-standard="b" aria-pressed="true">T568B</button>
+            </div>
+            <div class="pin-practice" data-pin-practice>
+              <div class="pin-practice__actions">
+                <button type="button" class="chip-button chip-button--ink" data-pin-mode aria-pressed="false">Practicar: ordena los hilos</button>
+                <button type="button" class="chip-button chip-button--ink" data-pin-check hidden>Comprobar</button>
+                <button type="button" class="chip-button chip-button--ink" data-pin-solve hidden>Ver respuesta</button>
+              </div>
+              <p class="pin-practice__msg" data-pin-msg aria-live="polite" hidden></p>
+            </div>
+          </div>
+          <div class="rj45" data-pin-list aria-label="Orden de pines del conector RJ-45">
+            <div class="rj45__clip" aria-hidden="true"></div>
+            <ol>
+              <li data-pin><span class="pin-visual"></span><b>1</b><span data-pin-label>Blanco/Naranja</span></li>
+              <li data-pin><span class="pin-visual"></span><b>2</b><span data-pin-label>Naranja</span></li>
+              <li data-pin><span class="pin-visual"></span><b>3</b><span data-pin-label>Blanco/Verde</span></li>
+              <li data-pin><span class="pin-visual"></span><b>4</b><span data-pin-label>Azul</span></li>
+              <li data-pin><span class="pin-visual"></span><b>5</b><span data-pin-label>Blanco/Azul</span></li>
+              <li data-pin><span class="pin-visual"></span><b>6</b><span data-pin-label>Verde</span></li>
+              <li data-pin><span class="pin-visual"></span><b>7</b><span data-pin-label>Blanco/Café</span></li>
+              <li data-pin><span class="pin-visual"></span><b>8</b><span data-pin-label>Café</span></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="rj45-note" data-reveal>
+          <article><span>T568A</span><p>Blanco/Verde, Verde, Blanco/Naranja, Azul, Blanco/Azul, Naranja, Blanco/Café, Café.</p></article>
+          <article><span>T568B</span><p>Blanco/Naranja, Naranja, Blanco/Verde, Azul, Blanco/Azul, Verde, Blanco/Café, Café.</p></article>
+          <article><span>Video de la práctica</span><p>La portada incluye el video del ponchado con T568B. <a class="text-link" href="#inicio">Ver el video <span aria-hidden="true">→</span></a></p></article>
+        </div>
+
+        <nav class="chapter-pager"><a href="#inicio">← Portada</a><a href="#encapsulamiento">Encapsulamiento →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         07 Encapsulamiento y PDU
+    ================================= -->
+    <section class="chapter chapter--soft" id="encapsulamiento" data-cut="second" data-nav-title="Encapsulamiento y PDU">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">01</div>
+          <div>
+            <span class="eyebrow">Taller teórico-práctico</span>
+            <h2>Encapsulamiento, PDU y desencapsulamiento</h2>
+            <p>Cuando dos equipos se comunican, la información no viaja «tal cual»: cada capa agrega su propio encabezado para que los datos puedan direccionarse, transportarse y entregarse. Ese proceso es el encapsulamiento; el inverso, al recibir, es el desencapsulamiento.</p>
+          </div>
+        </header>
+
+        <div class="media-principles" data-reveal>
+          <article><span>01</span><h3>Encapsulamiento</h3><p>Los datos bajan por las capas. Cada una añade su información de control: puertos, direcciones IP y direcciones MAC. Al final quedan como bits.</p></article>
+          <article><span>02</span><h3>Desencapsulamiento</h3><p>En el receptor, los datos suben. Cada capa revisa y retira el encabezado que le corresponde, y entrega el resto a la capa siguiente.</p></article>
+          <article><span>03</span><h3>La analogía de la carta</h3><p>El mensaje va en un sobre con dirección; el sobre entra en una bolsa de correo, y así hasta llegar. Cada envoltura se retira en orden inverso.</p></article>
+        </div>
+
+        <div class="encap" data-reveal data-encap>
+          <div class="encap__head">
+            <div>
+              <span class="eyebrow">Simulador</span>
+              <h3>Construye y desarma una PDU</h3>
+            </div>
+            <div class="encap__tools">
+              <div class="segmented" aria-label="Escenario" data-encap-scenario>
+                <button type="button" class="is-active" data-scenario-key="https" aria-pressed="true">Captura HTTPS</button>
+                <button type="button" data-scenario-key="mail" aria-pressed="false">Correo SMTP</button>
+              </div>
+              <div class="segmented" aria-label="Sentido del proceso" data-encap-dir>
+                <button type="button" class="is-active" data-dir-key="down" aria-pressed="true">Encapsular</button>
+                <button type="button" data-dir-key="up" aria-pressed="false">Desencapsular</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="encap__grid">
+            <ol class="encap__layers" data-encap-layers aria-label="Capas del modelo de cinco capas"></ol>
+            <div class="encap__stage">
+              <div class="encap__flow" data-encap-flow aria-live="polite"></div>
+              <div class="encap__pdu" data-encap-pdu role="img" aria-label="Estructura de la PDU actual"></div>
+              <div class="encap__detail" data-encap-detail aria-live="polite">
+                <span class="encap__layer-name" data-encap-name></span>
+                <h4 data-encap-title></h4>
+                <p data-encap-text></p>
+                <dl data-encap-fields></dl>
+              </div>
+            </div>
+          </div>
+
+          <div class="encap__controls">
+            <button type="button" class="chip-button chip-button--ink" data-encap-prev>Anterior</button>
+            <button type="button" class="button button--primary button--compact" data-encap-play data-playing="false">Reproducir</button>
+            <button type="button" class="chip-button chip-button--ink" data-encap-next>Siguiente</button>
+            <button type="button" class="chip-button chip-button--ink" data-encap-reset>Reiniciar</button>
+            <span class="encap__counter" data-encap-counter>Paso 1 de 5</span>
+          </div>
+        </div>
+
+        <div class="ip-table-wrap" data-reveal>
+          <div class="ip-table-head"><h3>Resumen: capa, PDU y dirección</h3><span>Modelo de cinco capas del taller</span></div>
+          <div class="table-scroll" tabindex="0" aria-label="Tabla de capas, PDU, direccionamiento, protocolos y dispositivos">
+            <table>
+              <thead><tr><th>Capa</th><th>PDU</th><th>Direccionamiento</th><th>Protocolos / ejemplos</th><th>Dispositivo</th></tr></thead>
+              <tbody>
+                <tr><td>Aplicación</td><td>Datos</td><td>—</td><td>HTTP/HTTPS, FTP, SMTP, DNS</td><td>Host / servidor</td></tr>
+                <tr><td>Transporte</td><td>Segmento (TCP) / Datagrama (UDP)</td><td>Puertos</td><td>TCP, UDP</td><td>Host (proceso)</td></tr>
+                <tr><td>Red</td><td>Paquete</td><td>IP</td><td>IP, ICMP, enrutamiento</td><td>Router</td></tr>
+                <tr><td>Enlace de datos</td><td>Trama</td><td>MAC</td><td>Ethernet, Wi-Fi</td><td>Switch / NIC</td></tr>
+                <tr><td>Física</td><td>Bits</td><td>—</td><td>Señales eléctricas, ópticas o de radio</td><td>Cable, fibra, antena</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="technical-note">Truco mnemotécnico de la clase: «Do This Please, Send Frames Bien» → Datos, Transporte (Segmento), Paquete, Frame (Trama), Bits.</p>
+        </div>
+
+        <div class="models-pair" data-reveal>
+          <div class="models-pair__side"><span class="eyebrow">Modelos de referencia</span><h3>OSI y TCP/IP</h3><p>OSI (7 capas) es un modelo teórico y didáctico: describe funciones, no protocolos concretos. TCP/IP (4 capas) es el modelo práctico sobre el que funciona Internet. En el taller se estudian cinco capas: Aplicación, Transporte, Red, Enlace de datos y Física.</p></div>
+          <table class="models-table" aria-label="Correspondencia entre OSI y TCP/IP">
+            <thead><tr><th>OSI</th><th>TCP/IP</th></tr></thead>
+            <tbody>
+              <tr><td>7 · Aplicación</td><td rowspan="3">Aplicación</td></tr>
+              <tr><td>6 · Presentación</td></tr>
+              <tr><td>5 · Sesión</td></tr>
+              <tr><td>4 · Transporte</td><td>Transporte</td></tr>
+              <tr><td>3 · Red</td><td>Internet</td></tr>
+              <tr><td>2 · Enlace de datos</td><td rowspan="2">Acceso a la red</td></tr>
+              <tr><td>1 · Física</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="capture" data-reveal data-capture>
+          <div class="capture__copy">
+            <span class="eyebrow">Análisis de una captura</span>
+            <h3>¿A qué capa pertenece cada encabezado?</h3>
+            <p>Esta captura simplificada es la del taller. Identifica la capa de cada encabezado y el protocolo de aplicación probable.</p>
+            <pre class="capture__dump" aria-label="Captura de tráfico simplificada"><code><span>Trama Ethernet</span>  MAC origen  AA:BB:CC:11:22:33
+               MAC destino FF:EE:DD:44:55:66
+<span>Paquete IP</span>      IP origen   192.168.1.10 → 200.14.55.2
+<span>Segmento TCP</span>    Puerto origen 51422 → destino 443</code></pre>
+          </div>
+          <form class="capture__form" data-capture-form novalidate>
+            <label>Trama Ethernet con MACs
+              <select data-capture-answer="link"><option value="">Elige una capa…</option><option value="app">Aplicación</option><option value="transport">Transporte</option><option value="network">Red</option><option value="link">Enlace de datos</option><option value="physical">Física</option></select>
+            </label>
+            <label>Paquete IP con direcciones IP
+              <select data-capture-answer="network"><option value="">Elige una capa…</option><option value="app">Aplicación</option><option value="transport">Transporte</option><option value="network">Red</option><option value="link">Enlace de datos</option><option value="physical">Física</option></select>
+            </label>
+            <label>Segmento TCP con puertos
+              <select data-capture-answer="transport"><option value="">Elige una capa…</option><option value="app">Aplicación</option><option value="transport">Transporte</option><option value="network">Red</option><option value="link">Enlace de datos</option><option value="physical">Física</option></select>
+            </label>
+            <label>Protocolo de aplicación probable (puerto destino 443)
+              <select data-capture-answer="proto"><option value="">Elige un protocolo…</option><option value="http">HTTP</option><option value="https">HTTPS</option><option value="smtp">SMTP</option><option value="dns">DNS</option></select>
+            </label>
+            <div class="capture__actions"><button class="button button--primary button--compact" type="submit">Comprobar</button><button class="button button--ghost button--compact" type="reset">Limpiar</button></div>
+            <p class="form-feedback" data-capture-feedback hidden aria-live="polite"></p>
+          </form>
+        </div>
+
+        <div class="layer-debug" data-reveal data-debug>
+          <div class="layer-debug__head"><span class="eyebrow">Troubleshooting</span><h3>El modelo de capas ordena el diagnóstico</h3><p>Si un computador no llega a un servidor, no pruebes soluciones al azar: revisa capa por capa. Elige una capa para ver qué síntoma suele tener y qué revisar.</p></div>
+          <div class="segmented" aria-label="Capa a diagnosticar" data-debug-tabs>
+            <button type="button" class="is-active" data-debug-key="physical" aria-pressed="true">Física</button>
+            <button type="button" data-debug-key="link" aria-pressed="false">Enlace</button>
+            <button type="button" data-debug-key="network" aria-pressed="false">Red</button>
+            <button type="button" data-debug-key="transport" aria-pressed="false">Transporte</button>
+          </div>
+          <div class="layer-debug__panel" data-debug-panel aria-live="polite">
+            <div><span>Síntoma</span><p data-debug-symptom></p></div>
+            <div><span>Qué revisar</span><p data-debug-check></p></div>
+            <div><span>Orden recomendado</span><p data-debug-order></p></div>
+          </div>
+          <p class="technical-note">Herramientas como Wireshark permiten observar en tiempo real cada encabezado (Ethernet, IP, TCP/UDP) dentro de una misma captura.</p>
+        </div>
+
+        <div class="tf" data-reveal data-tf>
+          <div class="tf__head"><span class="eyebrow">Verdadero o falso</span><h3>Pon a prueba lo que viste</h3></div>
+          <ol class="tf__list" data-tf-list></ol>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#flujo">← Flujo de paquetes</a><a href="#ipv4">Direccionamiento IPv4 →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         08 IPv4
+    ================================= -->
+    <section class="chapter" id="ipv4" data-cut="first" data-nav-title="Direccionamiento IPv4">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">07</div>
+          <div>
+            <span class="eyebrow">Identidad lógica de los hosts</span>
+            <h2>Direccionamiento IPv4 estático</h2>
+            <p>Una dirección IP identifica lógicamente al dispositivo. La máscara separa la porción de red y de host. El gateway permite alcanzar destinos fuera de la subred local.</p>
+          </div>
+        </header>
+
+        <div class="ipv4-lesson" data-reveal>
+          <div class="ipv4-address" aria-label="Ejemplo de dirección IPv4"><span>192</span><i>.</i><span>168</span><i>.</i><span>10</span><i>.</i><span>30</span><b>/24</b></div>
+          <div class="ipv4-legend"><span><i></i>Red del taller: 192.168.10.0/24</span><span><i></i>Host del ejemplo: PC3</span></div>
+        </div>
+
+        <div class="ip-table-wrap" data-reveal>
+          <div class="ip-table-head"><h3>Taller LAN de cinco equipos</h3><span>Máscara: 255.255.255.0</span></div>
+          <div class="table-scroll" tabindex="0" aria-label="Tabla de direccionamiento IPv4">
+            <table>
+              <thead><tr><th>Host</th><th>Interfaz</th><th>Dirección IPv4</th><th>Gateway</th></tr></thead>
+              <tbody>
+                <tr><td>PC1</td><td>FastEthernet0</td><td>192.168.10.10</td><td>N/A</td></tr>
+                <tr><td>PC2</td><td>FastEthernet0</td><td>192.168.10.20</td><td>N/A</td></tr>
+                <tr class="is-highlighted"><td>PC3</td><td>FastEthernet0</td><td>192.168.10.30</td><td>N/A</td></tr>
+                <tr><td>PC4</td><td>FastEthernet0</td><td>192.168.10.40</td><td>N/A</td></tr>
+                <tr><td>PC5</td><td>FastEthernet0</td><td>192.168.10.50</td><td>N/A</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="configurator" data-reveal>
+          <div class="configurator__copy"><span class="eyebrow">Actividad</span><h3 data-ip-title>Configura PC3</h3><p data-ip-intro>Completa los datos exactamente como aparecen en el taller y comprueba la configuración.</p>
+            <div class="segmented" aria-label="Modo del validador"><button type="button" class="is-active" data-ip-mode="exercise" aria-pressed="true">Ejercicio PC3</button><button type="button" data-ip-mode="calc" aria-pressed="false">Calculadora libre</button></div><div class="terminal-mini" aria-hidden="true"><span>&gt; ping 192.168.10.50</span><strong>Reply from 192.168.10.50</strong></div></div>
+          <form class="config-form" data-ip-form novalidate>
+            <label for="host-ip">Dirección IP</label>
+            <input id="host-ip" name="host-ip" inputmode="numeric" autocomplete="off" placeholder="192.168.10.30" required>
+            <label for="host-mask">Máscara de subred</label>
+            <input id="host-mask" name="host-mask" inputmode="numeric" autocomplete="off" placeholder="255.255.255.0" required>
+            <div class="config-form__actions"><button class="button button--primary button--compact" type="submit">Comprobar</button><button class="button button--ghost button--compact" type="reset">Limpiar</button></div>
+            <p class="form-feedback" data-ip-feedback hidden aria-live="polite"></p>
+            <dl class="ip-results" data-ip-results hidden></dl>
+          </form>
+        </div>
+
+        <div class="gateway-note" data-reveal>
+          <div><span>En una LAN aislada</span><p>El taller de cinco PCs marca el gateway como N/A porque trabaja únicamente dentro del mismo segmento.</p></div>
+          <div><span>Cuando la red debe salir</span><p>En la guía integrada, el router usa 192.168.1.1 como puerta de enlace de la subred 192.168.1.0/24.</p></div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#encapsulamiento">← Encapsulamiento</a><a href="#laboratorio">Packet Tracer →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         09 Packet Tracer
+    ================================= -->
+    <section class="chapter chapter--soft" id="laboratorio" data-cut="first" data-nav-title="Packet Tracer">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">08</div>
+          <div>
+            <span class="eyebrow">Aplicación práctica</span>
+            <h2>Laboratorio guiado en Cisco Packet Tracer</h2>
+            <p>La práctica integra los tres medios estudiados: UTP, fibra óptica e inalámbrico. El objetivo es construir la topología, configurar direccionamiento y verificar la conectividad mediante ping y Simulation.</p>
+          </div>
+        </header>
+
+        <div class="lab-workbench" data-reveal>
+          <div class="lab-sidebar" aria-label="Pasos del laboratorio">
+            <button type="button" data-lab-step><span>01</span>Dispositivos</button>
+            <button type="button" data-lab-step><span>02</span>UTP</button>
+            <button type="button" data-lab-step><span>03</span>Fibra</button>
+            <button type="button" data-lab-step><span>04</span>Wi-Fi</button>
+            <button type="button" data-lab-step><span>05</span>IPv4</button>
+            <button type="button" data-lab-step><span>06</span>Ping</button>
+          </div>
+
+          <div class="lab-canvas" data-lab-diagram data-step="1">
+            <div class="lab-canvas__grid" aria-hidden="true"></div>
+            <div class="lab-device lab-device--pc0"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span>PC0</span><small>192.168.1.10</small></div>
+            <div class="lab-device lab-device--pc1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span>PC1</span><small>192.168.1.11</small></div>
+            <div class="lab-device lab-device--sw1"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h.01M11 12h.01M15 12h.01M19 12h.01"/></svg><span>Switch1</span></div>
+            <div class="lab-device lab-device--sw0"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h.01M11 12h.01M15 12h.01M19 12h.01"/></svg><span>Switch0</span></div>
+            <div class="lab-device lab-device--router"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 8h8M8 16h8"/></svg><span>Router0</span><small>192.168.1.1</small></div>
+            <div class="lab-device lab-device--ap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.6a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 20h.01"/></svg><span>AP</span><small>RedPractica</small></div>
+            <div class="lab-device lab-device--laptop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4zM2 19h20"/></svg><span>Laptop0</span><small>192.168.1.12</small></div>
+            <div class="lab-link lab-link--pc0-sw1"><span>UTP</span></div>
+            <div class="lab-link lab-link--pc1-sw1"><span>UTP</span></div>
+            <div class="lab-link lab-link--sw1-sw0"><span>CROSS</span></div>
+            <div class="lab-link lab-link--sw0-router"><span>FIBRA</span></div>
+            <div class="lab-link lab-link--sw0-ap"><span>UTP</span></div>
+            <div class="wifi-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="lab-packet" aria-hidden="true"></div>
+          </div>
+
+          <div class="lab-instruction" aria-live="polite">
+            <div class="lab-instruction__count" data-lab-counter>Paso 1 de 6</div>
+            <div class="lab-progress" aria-hidden="true"><span data-lab-progress></span></div>
+            <h3 data-lab-title>Colocar los dispositivos</h3>
+            <p data-lab-body></p>
+            <div class="lab-instruction__nav"><button type="button" data-lab-prev>Anterior</button><button type="button" data-lab-next>Siguiente</button></div>
+          </div>
+        </div>
+
+        <div class="cli-block" data-reveal>
+          <div class="cli-block__copy"><span class="eyebrow eyebrow--light">Router0 · CLI</span><h3>Configuración del gateway</h3><p>La guía utiliza estos comandos para activar la interfaz y asignar la dirección 192.168.1.1/24.</p></div>
+          <pre aria-label="Comandos de configuración del router"><code>enable
+configure terminal
+interface gigabitethernet 0/0
+ip address 192.168.1.1 255.255.255.0
+no shutdown
+exit
+exit</code></pre>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#ipv4">← Direccionamiento IPv4</a><a href="#taller-dhcp">Taller DHCP →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         10 Taller: DHCP y dos redes
+    ================================= -->
+    <section class="chapter" id="taller-dhcp" data-cut="second" data-nav-title="Taller DHCP">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">02</div>
+          <div>
+            <span class="eyebrow">Informe de laboratorio · Packet Tracer 9.0.1</span>
+            <h2>Taller: dos redes conectadas con DHCP</h2>
+            <p>Tres equipos de usuario y un servidor institucional ubicado en otra red. Dos switches y un router, que funciona como puerta de enlace entre 192.168.10.0/24 y 192.168.30.0/24, y un servicio DHCP configurado en Router0.</p>
+          </div>
+        </header>
+
+        <div class="objectives" data-reveal>
+          <article><span>Objetivo general</span><p>Construir una topología funcional que permita la comunicación entre una red de usuarios y una de servidores mediante direccionamiento IPv4 y asignación automática por DHCP.</p></article>
+          <ul>
+            <li>Cablear los equipos finales, los switches, el router y el servidor con los puertos de la práctica.</li>
+            <li>Configurar las interfaces de Router0 como gateways de ambas redes.</li>
+            <li>Asignar por DHCP .10, .11 y .12 a PC0, PC1 y Laptop0.</li>
+            <li>Comprobar la conectividad con ping y registrar los resultados.</li>
+          </ul>
+        </div>
+
+        <figure class="evidence evidence--wide" data-reveal>
+          <button type="button" class="evidence__open" data-gallery-open="0" aria-label="Ampliar Figura 1: topología completa">
+            <img src="assets/evidencias/fig1-topologia.jpg" width="943" height="415" loading="lazy" alt="Topología en Packet Tracer: PC0, PC1 y Laptop0 conectados a Switch0, Router0 2911, Switch1 y Server0, con todos los enlaces en verde.">
+            <span class="evidence__zoom" aria-hidden="true">Ampliar</span>
+          </button>
+          <figcaption><b>Figura 1.</b> Topología completa implementada en Packet Tracer. Los indicadores verdes muestran que los enlaces físicos están activos.</figcaption>
+        </figure>
+
+        <div class="ip-table-wrap" data-reveal data-lab-tables>
+          <div class="ip-table-head"><h3>Las tablas del informe</h3>
+            <div class="segmented" aria-label="Tablas del informe" data-table-tabs>
+              <button type="button" class="is-active" data-table-key="cables" aria-pressed="true">Conexiones</button>
+              <button type="button" data-table-key="ip" aria-pressed="false">Direccionamiento</button>
+              <button type="button" data-table-key="leases" aria-pressed="false">Concesiones</button>
+              <button type="button" data-table-key="ping" aria-pressed="false">Pruebas ping</button>
+            </div>
+          </div>
+
+          <div class="table-scroll" tabindex="0" data-table-panel="cables" aria-label="Conexiones físicas">
+            <table>
+              <thead><tr><th>Origen</th><th>Interfaz</th><th>Destino</th><th>Interfaz</th></tr></thead>
+              <tbody>
+                <tr><td>PC0</td><td>FastEthernet0</td><td>Switch de usuarios</td><td>FastEthernet0/1</td></tr>
+                <tr><td>PC1</td><td>FastEthernet0</td><td>Switch de usuarios</td><td>FastEthernet0/2</td></tr>
+                <tr><td>Laptop0</td><td>FastEthernet0</td><td>Switch de usuarios</td><td>FastEthernet0/3</td></tr>
+                <tr><td>Switch de usuarios</td><td>GigabitEthernet0/1</td><td>Router0</td><td>GigabitEthernet0/0</td></tr>
+                <tr><td>Router0</td><td>GigabitEthernet0/1</td><td>Switch de servidores</td><td>GigabitEthernet0/1</td></tr>
+                <tr><td>Switch de servidores</td><td>FastEthernet0/1</td><td>Server0</td><td>FastEthernet0</td></tr>
+              </tbody>
+            </table>
+            <p class="technical-note">Todas las conexiones usan cable Copper Straight-Through.</p>
+          </div>
+
+          <div class="table-scroll" tabindex="0" data-table-panel="ip" aria-label="Direccionamiento IPv4" hidden>
+            <table>
+              <thead><tr><th>Dispositivo</th><th>Interfaz</th><th>IPv4</th><th>Máscara</th><th>Gateway</th></tr></thead>
+              <tbody>
+                <tr><td>PC0 (DHCP)</td><td>FastEthernet0</td><td>192.168.10.10</td><td>255.255.255.0</td><td>192.168.10.1</td></tr>
+                <tr><td>PC1 (DHCP)</td><td>FastEthernet0</td><td>192.168.10.11</td><td>255.255.255.0</td><td>192.168.10.1</td></tr>
+                <tr><td>Laptop0 (DHCP)</td><td>FastEthernet0</td><td>192.168.10.12</td><td>255.255.255.0</td><td>192.168.10.1</td></tr>
+                <tr><td>Server0 (estático)</td><td>FastEthernet0</td><td>192.168.30.10</td><td>255.255.255.0</td><td>192.168.30.1</td></tr>
+                <tr><td>Router0 (estático)</td><td>G0/0</td><td>192.168.10.1</td><td>255.255.255.0</td><td>No aplica</td></tr>
+                <tr><td>Router0 (estático)</td><td>G0/1</td><td>192.168.30.1</td><td>255.255.255.0</td><td>No aplica</td></tr>
+              </tbody>
+            </table>
+            <p class="technical-note">La máscara 255.255.255.0 equivale a /24. Router0 y Server0 conservan direcciones estáticas porque son infraestructura.</p>
+          </div>
+
+          <div class="table-scroll" tabindex="0" data-table-panel="leases" aria-label="Concesiones DHCP registradas" hidden>
+            <table>
+              <thead><tr><th>Dirección IPv4</th><th>Identificador del cliente</th><th>Tipo</th></tr></thead>
+              <tbody>
+                <tr><td>192.168.10.10</td><td>0002.4AB4.CEE0</td><td>Automática</td></tr>
+                <tr><td>192.168.10.11</td><td>00D0.BAB1.02C2</td><td>Automática</td></tr>
+                <tr><td>192.168.10.12</td><td>00D0.5889.78C6</td><td>Automática</td></tr>
+              </tbody>
+            </table>
+            <p class="technical-note">Salida de <code>show ip dhcp binding</code>. El identificador del cliente es la dirección MAC de la interfaz.</p>
+          </div>
+
+          <div class="table-scroll" tabindex="0" data-table-panel="ping" aria-label="Resultados de las pruebas ping" hidden>
+            <table>
+              <thead><tr><th>Origen</th><th>Destino</th><th>Comando</th><th>Resultado</th><th>TTL</th></tr></thead>
+              <tbody>
+                <tr><td>PC0</td><td>Router0 G0/0</td><td>ping 192.168.10.1</td><td>4 enviados, 4 recibidos, 0 % pérdida</td><td>255</td></tr>
+                <tr><td>PC0</td><td>Laptop0</td><td>ping 192.168.10.12</td><td>4 enviados, 4 recibidos, 0 % pérdida</td><td>128</td></tr>
+                <tr><td>PC0</td><td>Server0</td><td>ping 192.168.30.10</td><td>4 enviados, 4 recibidos, 0 % pérdida</td><td>127</td></tr>
+              </tbody>
+            </table>
+            <p class="technical-note">Observación: el TTL de Server0 (127) es uno menos que el de Laptop0 (128) porque el paquete atravesó un router, que resta uno al TTL en cada salto.</p>
+          </div>
+        </div>
+
+        <div class="dhcp-sim" data-reveal data-dhcp>
+          <div class="dhcp-sim__copy">
+            <span class="eyebrow">Simulador de DHCP</span>
+            <h3>¿Cómo recibió cada equipo su dirección?</h3>
+            <p>Router0 entrega direcciones del pool USUARIOS. Para obtener exactamente .10, .11 y .12, se excluyeron <code>192.168.10.1 – 192.168.10.9</code> y <code>192.168.10.13 – 192.168.10.254</code>. Pulsa «Solicitar IP» en cada equipo, en orden, y observa qué dirección libre queda disponible.</p>
+            <div class="dhcp-sim__clients" data-dhcp-clients></div>
+            <button class="button button--ghost button--compact" type="button" data-dhcp-reset>Reiniciar</button>
+          </div>
+          <div class="dhcp-sim__pool">
+            <div class="dhcp-sim__legend"><span class="is-excluded">Excluida</span><span class="is-free">Disponible</span><span class="is-leased">Concedida</span></div>
+            <div class="dhcp-sim__cells" data-dhcp-cells aria-label="Direcciones 192.168.10.1 a 192.168.10.16 del pool"></div>
+            <p class="dhcp-sim__log" data-dhcp-log aria-live="polite">Ningún equipo ha solicitado dirección todavía.</p>
+          </div>
+        </div>
+
+        <div class="cli-block" data-reveal>
+          <div class="cli-block__copy"><span class="eyebrow eyebrow--light">Router0 · CLI</span><h3>Configuración del servicio DHCP</h3><p>El pool USUARIOS entrega máscara y gateway. Las exclusiones reservan el gateway y evitan entregar direcciones distintas a las previstas.</p></div>
+          <pre aria-label="Comandos de configuración de DHCP"><code>service dhcp
+ip dhcp excluded-address 192.168.10.1 192.168.10.9
+ip dhcp excluded-address 192.168.10.13 192.168.10.254
+ip dhcp pool USUARIOS
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1</code></pre>
+        </div>
+
+        <div class="server-services" data-reveal>
+          <div class="server-services__lead"><span class="eyebrow">Servicios de Server0</span><h3>Un servidor institucional con dirección fija</h3></div>
+          <div class="service-line">
+            <article><b>HTTP</b><span>Servicio web</span><p>Habilitado en Server0.</p></article>
+            <article><b>EMAIL</b><span>SMTP y POP3</span><p>Dominio tecnoandina.edu.co y una cuenta de prueba.</p></article>
+            <article><b>192.168.30.10</b><span>Dirección estática</span><p>Los clientes siempre lo localizan en la misma IP.</p></article>
+          </div>
+        </div>
+
+        <div class="evidence-section" data-reveal>
+          <div class="evidence-section__head"><span class="eyebrow">Evidencias</span><h3>Capturas del laboratorio</h3><p>Pulsa una captura para ampliarla y navegar entre ellas con las flechas.</p></div>
+          <div class="evidence-grid" data-evidence-grid></div>
+        </div>
+
+        <div class="analysis" data-reveal>
+          <article><span>Gateway</span><p>La respuesta de 192.168.10.1 demostró que PC0 estaba conectado al switch de usuarios y que la interfaz G0/0 de Router0 funcionaba.</p></article>
+          <article><span>Misma red</span><p>Laptop0 respondió sin intervención del router: los equipos pertenecen a la misma subred y el switch reenvía las tramas.</p></article>
+          <article><span>Entre redes</span><p>PC0 envió el tráfico a su gateway, Router0 lo encaminó por G0/1 y Server0 respondió mediante su propio gateway 192.168.30.1.</p></article>
+        </div>
+
+        <div class="conclusion-note" data-reveal>
+          <span class="eyebrow">Conclusión</span>
+          <p>La red quedó funcional: dos segmentos IPv4 separados por Router0, direccionamiento DHCP que coincide con la tabla establecida, y tres pruebas con cuatro respuestas y cero por ciento de pérdida. El cableado, el direccionamiento y el enrutamiento entre las dos redes quedaron configurados correctamente.</p>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#laboratorio">← Packet Tracer</a><a href="#seguridad">Seguridad →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         11 Seguridad
+    ================================= -->
+    <section class="chapter chapter--soft" id="seguridad" data-cut="second" data-nav-title="Seguridad de la red">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">03</div>
+          <div>
+            <span class="eyebrow">Confidencialidad · integridad · disponibilidad</span>
+            <h2>Seguridad en la infraestructura de red</h2>
+            <p>Una red es el sistema circulatorio de cualquier organización: si se compromete, se afecta la confidencialidad, la integridad y la disponibilidad de toda la información que transporta. La seguridad combina medidas físicas y lógicas, aplicadas en cada capa.</p>
+          </div>
+        </header>
+
+        <div class="threats" data-reveal>
+          <div class="threats__head"><span class="eyebrow">Amenazas comunes</span><h3>Seis formas de poner una red en riesgo</h3></div>
+          <div class="threats__grid">
+            <article><b>Malware</b><p>Virus, gusanos, troyanos y ransomware que infectan dispositivos.</p></article>
+            <article><b>Sniffing</b><p>Interceptación de tráfico no cifrado para robar información.</p></article>
+            <article><b>Spoofing / MITM</b><p>Suplantación de IP o MAC, o un intermediario entre dos partes.</p></article>
+            <article><b>DoS / DDoS</b><p>Saturación de recursos o ancho de banda para dejar el servicio fuera de línea.</p></article>
+            <article><b>Phishing</b><p>Ingeniería social para obtener credenciales o accesos.</p></article>
+            <article><b>Accesos no autorizados</b><p>Contraseñas débiles o puertos y servicios expuestos.</p></article>
+          </div>
+        </div>
+
+        <div class="practices" data-reveal data-practices>
+          <div class="practices__head">
+            <div><span class="eyebrow">Buenas prácticas</span><h3>Medidas físicas y lógicas</h3></div>
+            <div class="segmented" aria-label="Tipo de medida" data-practice-tabs>
+              <button type="button" class="is-active" data-practice-key="physical" aria-pressed="true">Seguridad física</button>
+              <button type="button" data-practice-key="logical" aria-pressed="false">Seguridad lógica</button>
+              <button type="button" data-practice-key="access" aria-pressed="false">Accesos y parches</button>
+              <button type="button" data-practice-key="monitor" aria-pressed="false">Monitoreo y respaldo</button>
+            </div>
+          </div>
+          <div class="practices__panel" data-practice-panel aria-live="polite">
+            <p class="practices__lead" data-practice-lead></p>
+            <ul class="practices__list" data-practice-list></ul>
+          </div>
+        </div>
+
+        <div class="ip-table-wrap" data-reveal data-layer-security>
+          <div class="ip-table-head"><h3>El modelo de capas como mapa de la seguridad</h3><span>Defensa en profundidad</span></div>
+          <div class="table-scroll" tabindex="0" aria-label="Riesgos y controles por capa">
+            <table>
+              <thead><tr><th>Capa</th><th>Riesgo típico</th><th>Control de seguridad</th></tr></thead>
+              <tbody>
+                <tr><td>Aplicación</td><td>Phishing, malware, datos expuestos</td><td>Antivirus, filtrado de contenido, capacitación</td></tr>
+                <tr><td>Transporte</td><td>Escaneo de puertos, sesiones no cifradas</td><td>Firewall, cifrado TLS/SSL</td></tr>
+                <tr><td>Red</td><td>Spoofing de IP, enrutamiento malicioso</td><td>ACL, VPN, listas de rutas confiables</td></tr>
+                <tr><td>Enlace de datos</td><td>Suplantación de MAC, VLAN hopping</td><td>Port security, segmentación VLAN</td></tr>
+                <tr><td>Física</td><td>Acceso físico no autorizado</td><td>Control de acceso, cuartos cerrados, cámaras</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="case" data-reveal data-case>
+          <div class="case__head">
+            <span class="eyebrow">Caso de estudio</span>
+            <h3>TecnoAndina: cinco riesgos, cinco decisiones</h3>
+            <p>La empresa tiene el cuarto de equipos sin cerradura, una única contraseña de Wi-Fi que no cambia hace tres años, ninguna VLAN entre el área administrativa y los invitados, ningún respaldo de configuraciones y firmware sin actualizar en más de dos años. Clasifica cada riesgo como seguridad física o lógica.</p>
+            <div class="case__score"><b data-case-score>0 / 5</b><span>clasificados correctamente</span></div>
+          </div>
+          <ol class="case__list" data-case-list></ol>
+          <div class="case__critical" data-case-critical hidden>
+            <span class="eyebrow">¿Cuál es el riesgo más crítico?</span>
+            <p>Uno de los más críticos es la <b>falta de segmentación</b> entre la red administrativa y la de invitados: un equipo invitado podría alcanzar recursos internos, aumentando los accesos no autorizados y el desplazamiento de una amenaza. Se resuelve con VLAN independientes y reglas de firewall o ACL. Aun así, el <b>acceso libre al cuarto de equipos</b> también debe corregirse con prioridad: una persona con acceso físico podría desconectar o manipular los dispositivos directamente.</p>
+          </div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#taller-dhcp">← Taller DHCP</a><a href="#evaluacion">Evaluación →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         Conclusiones
+    ================================= -->
+    <section class="chapter chapter--light" id="conclusiones" data-nav-title="Conclusiones" data-cut="both">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">09</div>
+          <div>
+            <span class="eyebrow">Lo que aprendimos</span>
+            <h2>Conclusiones</h2>
+            <p data-cut="first">Al cerrar el primer corte entendemos cómo se conectan los dispositivos, cómo viajan los datos y cómo se construye una red desde la teoría hasta Packet Tracer.</p>
+            <p data-cut="second">Con los talleres del segundo corte relacionamos el funcionamiento de las capas con situaciones de una red real: cómo se encapsulan los datos, cómo se configura y se verifica una red con DHCP y cómo se protege la infraestructura.</p>
+          </div>
+        </header>
+
+        <div class="concl" data-cut="first">
+          <div class="concl-stats" data-reveal data-concl-stats>
+            <div><b data-count="4">4</b><span>tipos de red</span></div>
+            <div><b data-count="5">5</b><span>dispositivos</span></div>
+            <div><b data-count="3">3</b><span>medios de transmisión</span></div>
+            <div><b data-count="6">6</b><span>pasos de laboratorio</span></div>
+          </div>
+          <div class="concl-grid">
+            <article class="concl-item"><span class="concl-item__n">01</span><div><h3>Las redes se construyeron sobre estándares</h3><p>De ARPANET a la nube, la estandarización de TCP/IP y Ethernet permitió que equipos distintos se comuniquen de forma transparente. El alcance define el tipo de red: LAN, WLAN, MAN o WAN.</p><a class="concl-item__link" href="#fundamentos">Fundamentos <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">02</span><div><h3>La topología condiciona la tolerancia a fallos</h3><p>La estrella concentra todo en un switch central, como en el taller de cinco equipos, pero ese switch es un punto único de falla. La malla usa enlaces redundantes y se reencamina cuando uno falla.</p><a class="concl-item__link" href="#topologias">Topologías <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">03</span><div><h3>Cada dispositivo trabaja en una capa distinta</h3><p>El switch conmuta tramas con direcciones MAC (aprende, hace flooding o reenvía por unicast); el router enruta paquetes con IP y delimita los dominios de broadcast; DHCP, DNS y HTTP sostienen la experiencia del usuario.</p><a class="concl-item__link" href="#dispositivos">Dispositivos <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">04</span><div><h3>El medio se elige según el escenario</h3><p>UTP es económico y estable en distancias de red local; la fibra es inmune a interferencias y llega a decenas de kilómetros; el medio inalámbrico aporta movilidad total. Se compara por distancia, ancho de banda y ruido.</p><a class="concl-item__link" href="#medios">Medios <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">05</span><div><h3>Un cable bien hecho empieza por entender el UTP</h3><p>Cuatro pares trenzados reducen la diafonía y el conector RJ-45 tiene ocho posiciones. Las categorías definen frecuencia y velocidad, y el cable directo o cruzado depende de si los equipos son distintos o iguales.</p><a class="concl-item__link" href="#cableado">Cableado UTP <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">06</span><div><h3>El paquete cambia de MAC, no de IP</h3><p>En el recorrido host, switch, router y servidor, las direcciones MAC se reconstruyen en cada enlace mientras las IP de los extremos se mantienen. Esa idea conecta Capa 2 con Capa 3.</p><a class="concl-item__link" href="#flujo">Flujo de paquetes <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">07</span><div><h3>IP, máscara y gateway definen dónde está un equipo</h3><p>La máscara separa la porción de red y de host, y el gateway permite salir de la subred. En una LAN aislada, como el taller de cinco PCs, el gateway no aplica.</p><a class="concl-item__link" href="#ipv4">Direccionamiento IPv4 <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">08</span><div><h3>La práctica integra todo y se verifica con ping</h3><p>En Packet Tracer se combinan UTP, fibra y Wi-Fi con direccionamiento en 192.168.1.0/24. El ping y el modo Simulation confirman que el diseño funciona de extremo a extremo.</p><a class="concl-item__link" href="#laboratorio">Packet Tracer <span aria-hidden="true">→</span></a></div></article>
+          </div>
+        </div>
+
+        <div class="concl" data-cut="second">
+          <div class="concl-stats" data-reveal data-concl-stats>
+            <div><b data-count="5">5</b><span>PDU, una por capa</span></div>
+            <div><b data-count="2">2</b><span>redes /24 conectadas</span></div>
+            <div><b data-count="3">3</b><span>pings con 0 % de pérdida</span></div>
+            <div><b data-count="5">5</b><span>riesgos analizados</span></div>
+          </div>
+          <div class="concl-grid">
+            <article class="concl-item"><span class="concl-item__n">01</span><div><h3>El ponchado depende de seguir el estándar</h3><p>T568A y T568B se diferencian en el orden de los pares verde y naranja. Con el mismo estándar en ambos extremos el cable es directo; con estándares distintos es cruzado.</p><a class="concl-item__link" href="#rj45">Constructor RJ-45 <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">02</span><div><h3>Encapsular organiza, desencapsular interpreta</h3><p>El encapsulamiento hace que los datos salgan ordenados del emisor, con puertos, IP y MAC; el desencapsulamiento permite al receptor leerlos en el orden correcto. Son procesos complementarios.</p><a class="concl-item__link" href="#encapsulamiento">Encapsulamiento y PDU <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">03</span><div><h3>Conocer las PDU ayuda a diagnosticar</h3><p>Datos, segmento, paquete, trama y bits tienen cada uno su capa, su direccionamiento y su dispositivo. Identificarlos permite revisar una falla capa por capa en lugar de probar al azar.</p><a class="concl-item__link" href="#encapsulamiento">Diagnóstico por capas <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">04</span><div><h3>Dos redes, un router y DHCP funcionan juntos</h3><p>Router0 separó los equipos de usuario del servidor, con una puerta de enlace específica para cada red. Al estar conectado directamente a ambas, no fueron necesarias rutas estáticas.</p><a class="concl-item__link" href="#taller-dhcp">Taller DHCP <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">05</span><div><h3>DHCP evita escribir cada dirección a mano</h3><p>Las exclusiones del pool reservaron el gateway y dejaron solo .10, .11 y .12. Las concesiones registradas en Router0 coincidieron con la tabla de direccionamiento.</p><a class="concl-item__link" href="#taller-dhcp">Taller DHCP <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">06</span><div><h3>La conectividad se comprueba con evidencia</h3><p>Los tres pings desde PC0 (gateway, Laptop0 y Server0) tuvieron cuatro respuestas y cero por ciento de pérdida. Los TTL revelaron además que Server0 está un salto de router más lejos.</p><a class="concl-item__link" href="#taller-dhcp">Evidencias <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">07</span><div><h3>Que la red funcione no basta: hay que protegerla</h3><p>El caso TecnoAndina mostró que se necesitan controles físicos y lógicos. El riesgo más crítico fue la falta de segmentación entre la red administrativa y la de invitados; se corrige con VLAN y reglas de firewall o ACL.</p><a class="concl-item__link" href="#seguridad">Seguridad <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">08</span><div><h3>Cada capa tiene sus riesgos y sus controles</h3><p>Del phishing en la capa de aplicación a la suplantación de MAC en el enlace y el acceso físico no autorizado, la defensa en profundidad aplica un control adecuado en cada nivel.</p><a class="concl-item__link" href="#seguridad">Seguridad por capa <span aria-hidden="true">→</span></a></div></article>
+          </div>
+        </div>
+
+        <aside class="concl-close" data-reveal>
+          <p data-cut="first">Una red funciona porque cada capa, dispositivo y medio resuelve una parte distinta del problema. Entenderlas por separado es lo que permite diseñarla y diagnosticarla.</p>
+          <p data-cut="second">Entender el modelo de capas no es solo teoría: es la base práctica del diagnóstico de fallas y del diseño de redes seguras.</p>
+        </aside>
+
+        <nav class="chapter-pager"><a href="#laboratorio">← Packet Tracer</a><a href="#evaluacion">Evaluación →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         12 Evaluación
+    ================================= -->
+    <section class="chapter chapter--ink" id="evaluacion" data-cut="both" data-nav-title="Evaluación">
+      <div class="chapter__shell chapter__shell--narrow">
+        <header class="chapter-heading chapter-heading--light" data-reveal>
+          <div class="chapter-heading__index">10</div>
+          <div>
+            <span class="eyebrow eyebrow--light">Comprobación del aprendizaje</span>
+            <h2>Reto final de redes</h2>
+            <p>Diez preguntas elegidas al azar de un banco construido con los talleres y los conceptos de los capítulos anteriores. Cada intento es distinto.</p>
+          </div>
+        </header>
+
+        <div class="quiz" data-quiz data-quiz-limit="10" data-reveal>
+          <div class="quiz__top">
+            <span data-quiz-progress-text>Pregunta 1 de 10</span><span data-quiz-score>0 correctas</span>
+          </div>
+          <div class="quiz__bar"><span data-quiz-progress></span></div>
+
+          <div class="quiz__body" data-quiz-body>
+            <p class="quiz__label">Selecciona una respuesta</p>
+            <h3 data-quiz-question tabindex="-1">Cargando pregunta…</h3>
+            <div class="quiz__options" data-quiz-options></div>
+            <p class="quiz-feedback" data-quiz-feedback hidden aria-live="polite"></p>
+            <div class="quiz__actions"><button class="button button--light button--compact" type="button" data-quiz-next disabled>Siguiente pregunta</button></div>
+          </div>
+
+          <div class="quiz-result" data-quiz-result hidden tabindex="-1">
+            <span class="quiz-result__label">Resultado final</span>
+            <h3 data-result-title>Resultado</h3>
+            <div class="quiz-result__score"><strong data-result-score>0/10</strong><span data-result-percent>0%</span></div>
+            <p data-result-message></p>
+            <button class="button button--light" type="button" data-quiz-restart>Volver a intentar</button>
+          </div>
+        </div>
+
+        <nav class="chapter-pager chapter-pager--dark" aria-label="Navegación entre capítulos"><a href="#seguridad">← Seguridad</a><a href="#glosario">Glosario →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         13 Glosario
+    ================================= -->
+    <section class="chapter" id="glosario" data-cut="both" data-nav-title="Glosario">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">11</div>
+          <div>
+            <span class="eyebrow">Consulta rápida</span>
+            <h2>Glosario técnico</h2>
+            <p>Los términos provienen de los contenidos trabajados: dispositivos, direccionamiento, servicios, medios, cableado y pruebas de conectividad.</p>
+          </div>
+        </header>
+
+        <div class="glossary-tools" data-reveal>
+          <label for="glossary-search">Buscar término o definición</label>
+          <div class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="glossary-search" type="search" data-glossary-search placeholder="Ejemplo: DHCP, MAC, fibra…" autocomplete="off"></div>
+          <span data-glossary-count>0 términos</span>
+        </div>
+        <div class="glossary-filters" data-reveal>
+          <div class="glossary-letters" data-glossary-letters role="group" aria-label="Filtrar por letra"></div>
+          <div class="glossary-filters__actions">
+            <button type="button" class="chip-button chip-button--ink" data-glossary-clear hidden>Limpiar búsqueda</button>
+            <button type="button" class="chip-button chip-button--ink" data-glossary-toggle data-expanded="false">Expandir todo</button>
+          </div>
+        </div>
+        <div class="glossary-list" data-glossary-list data-reveal></div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#evaluacion">← Evaluación</a><a href="#cierre">Cierre →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         14 Cierre y referencias
+    ================================= -->
+    <section class="chapter chapter--closing" id="cierre" data-cut="both" data-nav-title="Cierre y fuentes">
+      <div class="chapter__shell">
+        <header class="closing-heading" data-reveal>
+          <span class="chapter-heading__index">12</span>
+          <div><span class="eyebrow eyebrow--light">Síntesis</span><h2>Una red funciona porque cada capa, dispositivo y medio resuelve una parte distinta del problema.</h2></div>
+        </header>
+
+        <div class="learning-summary" data-cut="first" data-reveal>
+          <article><span>01</span><h3>Identificar</h3><p>Diferenciar LAN, WLAN, MAN y WAN; reconocer topologías y el papel de cada dispositivo.</p></article>
+          <article><span>02</span><h3>Relacionar</h3><p>Conectar MAC con Capa 2, IP con Capa 3 y servicios como DHCP, DNS y HTTP con la experiencia de red.</p></article>
+          <article><span>03</span><h3>Elegir</h3><p>Comparar UTP, fibra e inalámbrico según distancia, ancho de banda, interferencia y movilidad.</p></article>
+          <article><span>04</span><h3>Aplicar</h3><p>Configurar direccionamiento IPv4, construir topologías en Packet Tracer y validar conectividad con ping.</p></article>
+        </div>
+
+        <div class="learning-summary" data-cut="second" data-reveal>
+          <article><span>01</span><h3>Comprender</h3><p>Explicar el encapsulamiento y el desencapsulamiento, y por qué son procesos complementarios.</p></article>
+          <article><span>02</span><h3>Identificar</h3><p>Reconocer la PDU de cada capa (datos, segmento, paquete, trama y bits) con su direccionamiento y dispositivo.</p></article>
+          <article><span>03</span><h3>Diagnosticar</h3><p>Usar el modelo de capas para ubicar fallas y comprobar la red con DHCP, tablas y pruebas de ping.</p></article>
+          <article><span>04</span><h3>Proteger</h3><p>Aplicar medidas físicas y lógicas y reconocer riesgos como una red sin segmentación.</p></article>
+        </div>
+
+        <div class="references" data-reveal>
+          <div class="references__head"><span class="eyebrow eyebrow--light">Fuentes del contenido</span><h3>Material académico suministrado</h3><p>La plataforma se construyó a partir de los documentos, talleres y presentaciones entregados para el proyecto.</p></div>
+          <ol>
+            <li data-cut="first"><span>01</span><div><strong>Conceptos Básicos de las Redes de Computadoras</strong><p>Historia, tipos de redes, topologías y práctica básica en Cisco Packet Tracer.</p></div></li>
+            <li data-cut="first"><span>02</span><div><strong>CCNA 1 — Dispositivos de Red</strong><p>Hosts, servidores, switches, routers, access points y flujo extremo a extremo.</p></div></li>
+            <li data-cut="first"><span>03</span><div><strong>CCNA 1 — Medios de Transmisión de Red</strong><p>UTP, fibra óptica, inalámbricos, normas de cableado y comparación de medios.</p></div></li>
+            <li data-cut="first"><span>04</span><div><strong>Taller Teórico CCNA1 — Dispositivos de Red</strong><p>Preguntas conceptuales utilizadas como base de la evaluación interactiva.</p></div></li>
+            <li data-cut="first"><span>05</span><div><strong>Taller Práctico: Redes LAN</strong><p>Topología en estrella, direccionamiento 192.168.10.0/24 y pruebas ICMP.</p></div></li>
+            <li data-cut="first"><span>06</span><div><strong>Guía paso a paso</strong><p>Práctica integrada con UTP, cable cruzado, fibra óptica, Wi-Fi, router y pruebas de conectividad.</p></div></li>
+            <li data-cut="second"><span>07</span><div><strong>Informe del taller: Cableado y configuración básica de una red en Cisco Packet Tracer</strong><p>Dos redes con DHCP, evidencias y pruebas de conectividad (formato APA 7).</p></div></li>
+            <li data-cut="second"><span>08</span><div><strong>Presentación: Encapsulamiento, PDU y Seguridad en Infraestructura de Red</strong><p>Modelos OSI y TCP/IP, PDU por capa, desencapsulamiento, amenazas y buenas prácticas.</p></div></li>
+            <li data-cut="second"><span>09</span><div><strong>Taller teórico-práctico: Encapsulamiento, PDU y Seguridad</strong><p>Preguntas, captura de tráfico y caso TecnoAndina, con su rúbrica de evaluación.</p></div></li>
+          </ol>
+        </div>
+
+        <div class="closing-action" data-reveal>
+          <p>Recorrido completado</p><button class="button button--light" type="button" data-scroll-target="inicio">Volver al inicio</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__brand"><strong>NETLAB</strong><span>Fundamentos de Redes</span></div>
+    <div class="site-footer__academic"><p>Universidad Santo Tomás · Seccional Villavicencio</p><p>Redes · Docente: Omar Camilo Santiago</p></div>
+    <div class="site-footer__authors"><p>Juan José Montoya Garzón</p><p>Santiago Saray Quevedo · <span data-year>2026</span></p></div>
+    <a href="#inicio" class="site-footer__top">Volver arriba ↑</a>
+  </footer>
+  <button class="to-top" type="button" data-to-top aria-label="Volver arriba"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+  <div class="lightbox" data-lightbox role="dialog" aria-modal="true" aria-label="Visor de evidencias" hidden>
+    <button class="lightbox__close" type="button" data-lightbox-close aria-label="Cerrar visor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="lightbox__nav lightbox__nav--prev" type="button" data-lightbox-prev aria-label="Captura anterior">‹</button>
+    <figure class="lightbox__figure"><img data-lightbox-img alt=""><figcaption data-lightbox-caption></figcaption></figure>
+    <button class="lightbox__nav lightbox__nav--next" type="button" data-lightbox-next aria-label="Captura siguiente">›</button>
+    <span class="lightbox__count" data-lightbox-count></span>
+  </div>
+  <div class="toast" data-toast role="status" aria-live="polite"></div>
+</body>
+</html>
