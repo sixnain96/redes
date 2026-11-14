@@ -1,0 +1,122 @@
+/* ==============================
+   NETLAB · Sistema de movimiento
+   Se carga al final y refina las transiciones existentes:
+   curvas más naturales, entradas escalonadas, transición entre cortes
+   y microinteracciones. Todo respeta prefers-reduced-motion.
+================================ */
+:root {
+  --ease-out: cubic-bezier(.16, 1, .3, 1);          /* salida exponencial: arranque ágil, aterrizaje suave */
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-soft: cubic-bezier(.4, 0, .2, 1);
+  --dur-fast: 180ms;
+  --dur-base: 420ms;
+  --dur-slow: 900ms;
+  --transition: 220ms var(--ease-out);
+  --transition-slow: 640ms var(--ease-out);
+}
+
+/* ---------- Revelado al hacer scroll ---------- */
+.js [data-reveal] { transform: translate3d(0, 28px, 0); transition: opacity 900ms var(--ease-out), transform 1000ms var(--ease-out); will-change: opacity, transform; }
+.js [data-reveal].is-visible { transform: none; will-change: auto; }
+.js-enh .stagger-item { transform: translate3d(0, 22px, 0); transition: opacity 760ms var(--ease-out), transform 860ms var(--ease-out); transition-delay: calc(var(--i, 0) * 80ms); }
+
+/* Títulos de capítulo: el número entra desde la izquierda y la línea del eyebrow se dibuja */
+.js .chapter-heading[data-reveal] .chapter-heading__index { opacity: 0; transform: translateX(-28px); transition: opacity 900ms var(--ease-out) 120ms, transform 1100ms var(--ease-out) 120ms; }
+.js .chapter-heading[data-reveal].is-visible .chapter-heading__index { opacity: 1; transform: none; }
+.js .chapter-heading[data-reveal] .eyebrow::before { transform: scaleX(0); transform-origin: left; transition: transform 800ms var(--ease-out) 320ms; }
+.js .chapter-heading[data-reveal].is-visible .eyebrow::before { transform: scaleX(1); }
+.js .chapter-heading[data-reveal] h2 { clip-path: inset(0 0 100% 0); transform: translateY(18px); transition: clip-path 900ms var(--ease-out) 200ms, transform 900ms var(--ease-out) 200ms; }
+.js .chapter-heading[data-reveal].is-visible h2 { clip-path: inset(-10% -2% -10% -2%); transform: none; }
+
+/* ---------- Portada ---------- */
+.hero__rule { transform-origin: left; animation: ruleDraw 1100ms var(--ease-out) 150ms both; }
+@keyframes ruleDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.js-motion .hero__kicker { animation: riseIn 900ms var(--ease-out) 60ms both; }
+.js-motion .hero__lead { animation: riseIn 1000ms var(--ease-out) 560ms both; }
+.js-motion .hero__academic { animation: riseIn 1000ms var(--ease-out) 700ms both; }
+.js-motion .hero__actions { animation: riseIn 1000ms var(--ease-out) 820ms both; }
+.js-motion .hero__visual { animation: riseIn 1200ms var(--ease-out) 400ms both; }
+@keyframes riseIn { from { opacity: 0; transform: translate3d(0, 26px, 0); } to { opacity: 1; transform: none; } }
+.w { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .09em; margin-bottom: -.09em; }
+.w__i { display: inline-block; transform: translate3d(0, 108%, 0); animation: wordUp 1000ms var(--ease-out) both; animation-delay: calc(140ms + var(--wi, 0) * 90ms); }
+@keyframes wordUp { to { transform: none; } }
+
+/* ---------- Cabecera ---------- */
+.site-header { transition: background 400ms var(--ease-soft), box-shadow 400ms var(--ease-soft), backdrop-filter 400ms; }
+.brand__mark svg path { stroke-dasharray: 90; stroke-dashoffset: 90; animation: strokeDraw 1200ms var(--ease-out) 200ms forwards; }
+@keyframes strokeDraw { to { stroke-dashoffset: 0; } }
+.reading-progress span { transition: transform 200ms linear; }
+
+/* ---------- Transición entre cortes (View Transitions) ---------- */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) { animation: 240ms cubic-bezier(.4, 0, 1, 1) both vtOut; }
+  ::view-transition-new(root) { animation: 520ms var(--ease-out) both vtIn; }
+}
+@keyframes vtOut { to { opacity: 0; transform: translateY(-10px); } }
+@keyframes vtIn { from { opacity: 0; transform: translateY(14px); } }
+
+/* ---------- Spotlight en tarjetas ---------- */
+.spot { position: relative; isolation: isolate; }
+.spot::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(4, 153, 208, .14), transparent 70%); transition: opacity 400ms var(--ease-out); }
+.spot:hover::before { opacity: 1; }
+.cut-card.spot::before { background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%), rgba(4, 160, 219, .22), transparent 70%); }
+.cut-card.spot { overflow: hidden; }
+
+/* ---------- Botones y controles ---------- */
+.button, .chip-button, .small-action { transition: background 260ms var(--ease-out), border-color 260ms var(--ease-out), color 260ms var(--ease-out), transform 300ms var(--ease-out), box-shadow 300ms var(--ease-out); }
+.button--primary:hover:not(:disabled) { box-shadow: 0 14px 30px rgba(4, 153, 208, .32); }
+.pulse-hint { animation: hintRing 2.4s var(--ease-out) infinite; }
+@keyframes hintRing { 0% { box-shadow: 0 0 0 0 rgba(4, 153, 208, .55); } 70% { box-shadow: 0 0 0 16px rgba(4, 153, 208, 0); } 100% { box-shadow: 0 0 0 0 rgba(4, 153, 208, 0); } }
+.text-link span, .concl-item__link span, .route-card__footer a span { display: inline-block; transition: transform 320ms var(--ease-out); }
+.text-link:hover span, .concl-item__link:hover span, .route-card__footer a:hover span { transform: translateX(5px); }
+
+/* ---------- Cambio de contenido en paneles ---------- */
+@keyframes swapIn { from { opacity: 0; transform: translate3d(0, 12px, 0); } to { opacity: 1; transform: none; } }
+.anim-swap { animation: swapIn 560ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 55ms); }
+
+/* ---------- Menú lateral ---------- */
+.menu-panel { transition-timing-function: var(--ease-out); }
+
+/* ---------- Pantalla de bienvenida (primera visita) ---------- */
+.intro { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; background: var(--charcoal); color: var(--white); clip-path: inset(0 0 0 0); transition: clip-path 900ms var(--ease-in-out); }
+.intro.is-leaving { clip-path: inset(0 0 100% 0); }
+/* Seguro: aunque falle algún script, la bienvenida se retira sola y nunca bloquea la página */
+.intro { animation: introFailsafe 1ms linear 4.2s forwards; }
+@keyframes introFailsafe { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+.intro__inner { display: grid; justify-items: center; gap: 1.1rem; text-align: center; padding: 1rem; }
+.intro__mark { width: 74px; height: 74px; border: 1px solid var(--blue-primary); display: grid; place-items: center; animation: introMark 900ms var(--ease-out) both; }
+.intro__mark svg { width: 46px; height: 46px; fill: none; stroke: var(--blue-primary); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.intro__mark path { stroke-dasharray: 90; stroke-dashoffset: 90; animation: strokeDraw 1100ms var(--ease-out) 250ms forwards; }
+@keyframes introMark { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+.intro__name { font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; letter-spacing: .5em; padding-left: .5em; animation: introText 900ms var(--ease-out) 500ms both; }
+.intro__cut { font-family: var(--font-mono); font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--blue-light); animation: introText 900ms var(--ease-out) 800ms both; }
+.intro__bar { width: min(220px, 50vw); height: 2px; background: var(--white-12); overflow: hidden; animation: introText 600ms var(--ease-out) 900ms both; }
+.intro__bar i { display: block; height: 100%; background: var(--blue-primary); transform-origin: left; animation: introBar 1500ms var(--ease-in-out) 800ms both; }
+@keyframes introText { from { opacity: 0; transform: translateY(14px); letter-spacing: .6em; } to { opacity: 1; transform: none; } }
+@keyframes introBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+body.is-intro { overflow: hidden; animation: introUnlock 1ms linear 4.2s forwards; }
+@keyframes introUnlock { to { overflow: visible; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .w__i, .hero__rule, .js-motion .hero__kicker, .js-motion .hero__lead, .js-motion .hero__academic, .js-motion .hero__actions, .js-motion .hero__visual { animation: none !important; transform: none !important; opacity: 1 !important; }
+  .js .chapter-heading[data-reveal] .chapter-heading__index, .js .chapter-heading[data-reveal] h2 { opacity: 1; transform: none; clip-path: none; }
+  .js .chapter-heading[data-reveal] .eyebrow::before { transform: none; }
+  .intro { display: none; }
+  .pulse-hint { animation: none; }
+}
+
+/* Las palabras del titular heredan el color de su contenedor (el acento azul de «Redes» se conserva) */
+.hero h1 span.w, .hero h1 span.w__i { color: inherit; }
+
+/* ---------- Barra lateral de capítulos ---------- */
+.rail { position: fixed; z-index: 40; right: 14px; top: 50%; display: none; flex-direction: column; gap: 2px; padding: .5rem .35rem; transform: translate(14px, -50%); opacity: 0; pointer-events: none; transition: opacity 500ms var(--ease-out), transform 600ms var(--ease-out); }
+.rail.is-shown:not(.is-hidden) { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+.rail a { position: relative; display: flex; align-items: center; justify-content: flex-end; gap: .7rem; padding: .32rem .2rem; text-decoration: none; }
+.rail a i { display: block; width: 7px; height: 7px; border-radius: 50%; background: rgba(120, 130, 138, .55); box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); transition: transform 360ms var(--ease-spring), background 260ms var(--ease-out), height 360ms var(--ease-out); }
+.rail a span { padding: .22rem .6rem; background: var(--charcoal); color: var(--white); font-size: .72rem; font-weight: 700; white-space: nowrap; opacity: 0; transform: translateX(8px); pointer-events: none; transition: opacity 260ms var(--ease-out), transform 320ms var(--ease-out); }
+.rail a:hover span, .rail a:focus-visible span { opacity: 1; transform: none; }
+.rail a:hover i { transform: scale(1.5); background: var(--blue-primary); }
+.rail a.is-current i { background: var(--blue-primary); height: 22px; border-radius: 4px; }
+@media (min-width: 1280px) { .rail { display: flex; } }
+@media print { .rail { display: none !important; } }

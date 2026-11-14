@@ -533,6 +533,11 @@
     });
   }
 
+  /* Registro de galerías: el tercer corte añade las suyas con NETLAB_LIGHTBOX.register() */
+  const galleries = { dhcp: figures };
+  window.NETLAB_LIGHTBOX = { register: (name, list) => { galleries[name] = list; } };
+  let figuresNow = figures;
+
   const box = qs('[data-lightbox]');
   if (box) {
     const img = qs('[data-lightbox-img]', box);
@@ -545,17 +550,18 @@
     let lastFocus = null;
 
     const show = (index) => {
-      current = (index + figures.length) % figures.length;
-      const fig = figures[current];
+      current = (index + figuresNow.length) % figuresNow.length;
+      const fig = figuresNow[current];
       box.classList.remove('is-zoomed');
       img.classList.remove('is-in');
       img.src = fig.src;
       img.alt = fig.alt;
       cap.textContent = `${fig.title}. ${fig.cap}`;
-      count.textContent = `${current + 1} / ${figures.length}`;
+      count.textContent = `${current + 1} / ${figuresNow.length}`;
       requestAnimationFrame(() => img.classList.add('is-in'));
     };
-    const open = (index) => {
+    const open = (index, group = 'dhcp') => {
+      figuresNow = galleries[group] || figures;
       lastFocus = document.activeElement;
       box.hidden = false;
       document.body.classList.add('lightbox-open');
@@ -572,7 +578,7 @@
 
     document.addEventListener('click', (event) => {
       const trigger = event.target instanceof Element ? event.target.closest('[data-gallery-open]') : null;
-      if (trigger) open(Number(trigger.dataset.galleryOpen));
+      if (trigger) open(Number(trigger.dataset.galleryOpen), trigger.dataset.gallery || 'dhcp');
     });
     closeBtn.addEventListener('click', close);
     prevBtn.addEventListener('click', () => show(current - 1));

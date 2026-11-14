@@ -70,14 +70,26 @@
   ================================ */
   const root = document.documentElement;
   const cutSwitches = qsa('[data-cut-switch]');
-  const cutLabels = { first: 'Primer corte', second: 'Segundo corte' };
+  const CUTS = {
+    first: { label: 'Primer corte', start: 'fundamentos', blurb: 'fundamentos, medios, cableado y Packet Tracer' },
+    second: { label: 'Segundo corte', start: 'rj45', blurb: 'RJ-45, Encapsulamiento, Taller DHCP y Seguridad' },
+    third: { label: 'Tercer corte', start: 'estructura-ipv4', blurb: 'IPv4, subredes, IPv6, rutas y OSPF' }
+  };
+  const cutLabels = { first: CUTS.first.label, second: CUTS.second.label, third: CUTS.third.label };
   const chapterNumbers = {
     first: { fundamentos: 1, topologias: 2, dispositivos: 3, medios: 4, cableado: 5, flujo: 6, ipv4: 7, laboratorio: 8, conclusiones: 9, evaluacion: 10, glosario: 11, cierre: 12 },
-    second: { rj45: 1, encapsulamiento: 2, 'taller-dhcp': 3, seguridad: 4, conclusiones: 5, evaluacion: 6, glosario: 7, cierre: 8 }
+    second: { rj45: 1, encapsulamiento: 2, 'taller-dhcp': 3, seguridad: 4, conclusiones: 5, evaluacion: 6, glosario: 7, cierre: 8 },
+    third: { 'estructura-ipv4': 1, subredes: 2, 'taller-ipv4': 3, 'taller-subredes': 4, 'capa-red': 5, fallas: 6, ospf: 7, conclusiones: 8, evaluacion: 9, glosario: 10, cierre: 11 }
   };
-  const pageTitles = { inicio: 'Portada', fundamentos: 'Fundamentos', topologias: 'Topologías', dispositivos: 'Dispositivos', medios: 'Medios', cableado: 'Cableado UTP', flujo: 'Flujo de paquetes', rj45: 'Constructor RJ-45', ipv4: 'Direccionamiento IPv4', laboratorio: 'Packet Tracer', encapsulamiento: 'Encapsulamiento', 'taller-dhcp': 'Taller DHCP', seguridad: 'Seguridad', conclusiones: 'Conclusiones', evaluacion: 'Evaluación', glosario: 'Glosario', cierre: 'Cierre' };
-  const getCut = () => (root.dataset.cut === 'second' ? 'second' : 'first');
-  const inCut = (el) => !el.dataset.cut || el.dataset.cut === 'both' || el.dataset.cut === getCut();
+  const pageTitles = { inicio: 'Portada', fundamentos: 'Fundamentos', topologias: 'Topologías', dispositivos: 'Dispositivos', medios: 'Medios', cableado: 'Cableado UTP', flujo: 'Flujo de paquetes', rj45: 'Constructor RJ-45', ipv4: 'Direccionamiento IPv4', laboratorio: 'Packet Tracer', encapsulamiento: 'Encapsulamiento', 'taller-dhcp': 'Taller DHCP', seguridad: 'Seguridad', 'estructura-ipv4': 'Estructura IPv4', subredes: 'Máscaras y subredes', 'taller-ipv4': 'Taller IPv4', 'taller-subredes': 'Taller 2: subredes', 'capa-red': 'Capa de red e IPv6', fallas: 'Seis fallas', ospf: 'Reto OSPF', conclusiones: 'Conclusiones', evaluacion: 'Evaluación', glosario: 'Glosario', cierre: 'Cierre' };
+  const getCut = () => (CUTS[root.dataset.cut] ? root.dataset.cut : 'first');
+  // data-cut admite una lista separada por espacios: «first second», o «both»
+  const cutMatches = (value, cut) => {
+    if (!value) return true;
+    const list = value.split(/\s+/);
+    return list.includes('both') || list.includes(cut);
+  };
+  const inCut = (el) => cutMatches(el.dataset.cut, getCut());
   const visibleSections = () => qsa('main section[id]').filter(inCut);
 
   const refreshCut = () => {
@@ -89,6 +101,7 @@
       button.setAttribute('aria-pressed', String(on));
     }));
     qsa('[data-cut-card]').forEach((card) => card.classList.toggle('is-current', card.dataset.cutCard === cut));
+    qsa('[data-start-link]').forEach((link) => link.setAttribute('href', `#${CUTS[cut].start}`));
     qsa('[data-nav-link]').forEach((link) => {
       const id = link.getAttribute('href').slice(1);
       const visible = inCut(link);
@@ -129,7 +142,7 @@
   };
 
   const setCut = (cut, { scroll = true, announce = true } = {}) => {
-    const next = cut === 'second' ? 'second' : 'first';
+    const next = CUTS[cut] ? cut : 'first';
     if (next === getCut() && !scroll) return;
     const changed = next !== getCut();
     const main = qs('#main-content');
@@ -139,31 +152,48 @@
       refreshCut();
       document.dispatchEvent(new CustomEvent('netlab:cut', { detail: { cut: next } }));
       if (scroll) {
-        const target = qs(`#${next === 'second' ? 'rj45' : 'fundamentos'}`);
-        if (target) target.scrollIntoView({ block: 'start' });
+        const target = qs(`#${CUTS[next].start}`);
+        if (target) {
+          root.style.scrollBehavior = 'auto';
+          target.scrollIntoView({ block: 'start' });
+          root.style.scrollBehavior = '';
+        }
       }
-      if (changed && announce) toast(`${cutLabels[next]}: ${next === 'second' ? 'RJ-45, Encapsulamiento, Taller DHCP y Seguridad' : 'fundamentos, medios, cableado y Packet Tracer'}`);
+      if (changed && announce) toast(`${CUTS[next].label}: ${CUTS[next].blurb}`);
     };
     if (!changed || reduceMotion || !main) { apply(); return; }
+    // Transición nativa entre estados cuando el navegador la soporta; si no, desvanecimiento
+    if (typeof document.startViewTransition === 'function') {
+      root.classList.add('is-cut-transition');
+      const transition = document.startViewTransition(apply);
+      transition.finished.finally(() => root.classList.remove('is-cut-transition'));
+      return;
+    }
     main.classList.add('is-switching');
     window.setTimeout(() => {
       apply();
       requestAnimationFrame(() => main.classList.remove('is-switching'));
     }, 220);
   };
+  window.NETLAB_CUTS = { CUTS, setCut, getCut, matches: cutMatches };
 
   qsa('[data-cut-select]').forEach((button) => button.addEventListener('click', () => {
     const inMenu = Boolean(button.closest('[data-menu-panel]'));
     setCut(button.dataset.cutSelect, { scroll: !inMenu || button.dataset.cutSelect !== getCut() });
     if (inMenu) qs('[data-menu-close]')?.click();
   }));
+  qsa('[data-scroll-start]').forEach((button) => button.addEventListener('click', () => {
+    const target = document.getElementById(CUTS[getCut()].start);
+    target?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+  }));
   // Un enlace directo a una sección de otro corte cambia de corte
   window.addEventListener('hashchange', () => {
     const id = window.location.hash.replace('#', '');
     const target = id && document.getElementById(id);
     const section = target && target.closest('section[data-cut]');
-    if (section && section.dataset.cut !== 'both' && section.dataset.cut !== getCut()) {
-      root.dataset.cut = section.dataset.cut;
+    if (section && !cutMatches(section.dataset.cut, getCut())) {
+      root.dataset.cut = section.dataset.cut.split(/\s+/)[0];
+      store.set('cut', root.dataset.cut);
       refreshCut();
       document.dispatchEvent(new CustomEvent('netlab:cut', { detail: { cut: getCut() } }));
       target.scrollIntoView({ block: 'start' });
@@ -398,6 +428,8 @@
       }));
     };
 
+    const packets = [];
+    let nextPacket = 0;
     const draw = () => {
       if (!running) return;
       ctx.clearRect(0, 0, width, height);
@@ -435,6 +467,32 @@
         ctx.fillStyle = 'rgba(4,153,208,.45)';
         ctx.beginPath();
         ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Paquetes que viajan de un nodo a otro, como en una red real
+      const nowT = performance.now();
+      if (nowT > nextPacket && packets.length < 6 && nodes.length) {
+        const from = Math.floor(Math.random() * nodes.length);
+        const near = [];
+        nodes.forEach((n, j) => { if (j !== from && Math.hypot(nodes[from].x - n.x, nodes[from].y - n.y) < reach) near.push(j); });
+        if (near.length) packets.push({ a: from, b: near[Math.floor(Math.random() * near.length)], t: 0 });
+        nextPacket = nowT + 450 + Math.random() * 800;
+      }
+      for (let k = packets.length - 1; k >= 0; k -= 1) {
+        const p = packets[k];
+        const A = nodes[p.a];
+        const B = nodes[p.b];
+        if (!A || !B || Math.hypot(A.x - B.x, A.y - B.y) > reach * 1.2) { packets.splice(k, 1); continue; }
+        p.t += 0.013;
+        if (p.t >= 1) { packets.splice(k, 1); continue; }
+        const x = A.x + (B.x - A.x) * p.t;
+        const y = A.y + (B.y - A.y) * p.t;
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, 10);
+        glow.addColorStop(0, 'rgba(4,160,219,.95)');
+        glow.addColorStop(1, 'rgba(4,160,219,0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
         ctx.fill();
       }
       frame = requestAnimationFrame(draw);

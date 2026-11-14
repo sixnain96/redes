@@ -30,7 +30,8 @@
       question: item.question,
       options: order.map((entry) => entry.text),
       answer: order.findIndex((entry) => entry.correct),
-      explanation: item.explanation
+      explanation: item.explanation,
+      topic: item.topic
     };
   });
 
@@ -271,6 +272,14 @@
         const why = document.createElement('p');
         why.textContent = item.explanation;
         card.append(q, mine, right, why);
+        const target = item.topic && document.getElementById(item.topic);
+        if (target) {
+          const link = document.createElement('a');
+          link.className = 'quiz-review__link';
+          link.href = `#${item.topic}`;
+          link.textContent = `Repasar: ${target.dataset.navTitle || item.topic} →`;
+          card.append(link);
+        }
         review.appendChild(card);
       });
       anchor.before(review);

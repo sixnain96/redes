@@ -572,7 +572,10 @@ body.lightbox-open { overflow: hidden; }
 /* ==============================
    Cortes académicos
 ================================ */
-html[data-cut="first"] [data-cut="second"], html[data-cut="second"] [data-cut="first"] { display: none !important; }
+/* data-cut admite «first», «second», «third», «both» o una lista separada por espacios */
+html[data-cut="first"] [data-cut]:not([data-cut~="first"]):not([data-cut="both"]),
+html[data-cut="second"] [data-cut]:not([data-cut~="second"]):not([data-cut="both"]),
+html[data-cut="third"] [data-cut]:not([data-cut~="third"]):not([data-cut="both"]) { display: none !important; }
 .chapter-nav a[hidden] { display: none; }
 #main-content { transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out); }
 #main-content.is-switching { opacity: 0; transform: translateY(10px); }
@@ -589,7 +592,7 @@ html[data-cut="first"] [data-cut="second"], html[data-cut="second"] [data-cut="f
 .cuts__shell { width: min(100%, var(--max-width)); margin-inline: auto; }
 .cuts__head h2 { margin: .6rem 0; color: var(--white); max-width: 22ch; }
 .cuts__head p { color: var(--white-66); max-width: 60ch; }
-.cuts__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 2.2rem; }
+.cuts__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; margin-top: 2.2rem; }
 .cut-card { position: relative; display: flex; flex-direction: column; gap: .9rem; padding: 1.8rem; background: var(--white-07); border: 1px solid var(--white-12); border-top: 3px solid var(--white-22); transition: border-color 320ms var(--ease-out), background 320ms var(--ease-out), transform 320ms var(--ease-out); }
 .cut-card:hover { transform: translateY(-4px); border-color: var(--blue-light); }
 .cut-card.is-current { border-top-color: var(--blue-primary); background: rgba(4,153,208,.1); }
@@ -603,6 +606,7 @@ html[data-cut="first"] [data-cut="second"], html[data-cut="second"] [data-cut="f
 .cut-card li { position: relative; padding-left: 1.1rem; }
 .cut-card li::before { content: ""; position: absolute; left: 0; top: .6em; width: 6px; height: 2px; background: var(--blue-light); }
 .cut-card .button { margin-top: auto; align-self: flex-start; }
+@media (max-width: 1080px) { .cuts__grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) { .cuts__grid { grid-template-columns: 1fr; } }
 
 /* Corrección: en pantallas pequeñas la portada se desbordaba por la derecha */
@@ -633,3 +637,6 @@ html[data-cut="first"] [data-cut="second"], html[data-cut="second"] [data-cut="f
 .concl-close p { color: var(--charcoal); font-size: 1.12rem; font-weight: 600; max-width: 62ch; }
 @media (max-width: 900px) { .concl-stats { grid-template-columns: 1fr 1fr; } .concl-stats > div:nth-child(2) { border-right: 0; } .concl-stats > div:nth-child(-n+2) { border-bottom: 1px solid var(--white-12); } .concl-grid { grid-template-columns: 1fr; } }
 @media (max-width: 430px) { .concl-item { grid-template-columns: 1fr; } }
+
+.quiz-review__link { display: inline-block; margin-top: .5rem; color: var(--blue-light); font-size: .8rem; font-weight: 720; text-decoration: none; }
+.quiz-review__link:hover { text-decoration: underline; text-underline-offset: .25rem; }

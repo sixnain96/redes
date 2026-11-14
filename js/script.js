@@ -407,7 +407,12 @@
   const glossaryToggle = qs('[data-glossary-toggle]');
   const glossaryState = { query: '', letter: '' };
   const currentCut = () => document.documentElement.dataset.cut || 'first';
-  const inCut = (entry) => !entry[2] ? currentCut() === 'first' : (entry[2] === 'both' || entry[2] === currentCut());
+  const matchCut = (value, cut) => {
+    if (!value) return cut === 'first';
+    const list = Array.isArray(value) ? value : String(value).split(/\s+/);
+    return list.includes('both') || list.includes(cut);
+  };
+  const inCut = (entry) => matchCut(entry[2], currentCut());
   const glossaryEntries = () => (data?.glossary || []).filter(inCut);
 
   const fold = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
@@ -522,7 +527,7 @@
   ================================ */
   const quizRoot = qs('[data-quiz]');
   if (quizRoot && window.NetlabQuiz && data?.quiz) {
-    const bank = () => data.quiz.filter((item) => (item.cut || 'first') === (document.documentElement.dataset.cut || 'first'));
+    const bank = () => data.quiz.filter((item) => matchCut(item.cut || 'first', document.documentElement.dataset.cut || 'first'));
     const quiz = new window.NetlabQuiz(quizRoot, bank());
     document.addEventListener('netlab:cut', () => quiz.load(bank()));
   }

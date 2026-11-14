@@ -7,20 +7,50 @@
   <meta name="theme-color" content="#242424">
   <title>NETLAB | Fundamentos de Redes</title>
   <script>
+    /* Corte activo y primera visita (se ejecuta antes de pintar para evitar parpadeos) */
     (function () {
-      var cut = 'first';
-      try { cut = JSON.parse(localStorage.getItem('netlab:cut')) || 'first'; } catch (e) {}
-      var secondIds = ['rj45', 'encapsulamiento', 'taller-dhcp', 'seguridad'];
-      var firstIds = ['fundamentos', 'topologias', 'dispositivos', 'mac', 'medios', 'cableado', 'flujo', 'ipv4', 'laboratorio'];
-      var id = (location.hash || '').replace('#', '').replace(/^laboratorio-paso-.*/, 'laboratorio');
-      if (secondIds.indexOf(id) > -1) cut = 'second';
-      else if (firstIds.indexOf(id) > -1) cut = 'first';
-      document.documentElement.setAttribute('data-cut', cut === 'second' ? 'second' : 'first');
+      var root = document.documentElement;
+      var ids = {
+        first: ['fundamentos', 'topologias', 'dispositivos', 'mac', 'medios', 'cableado', 'flujo', 'ipv4', 'laboratorio'],
+        second: ['rj45', 'encapsulamiento', 'taller-dhcp', 'seguridad'],
+        third: ['estructura-ipv4', 'subredes', 'taller-ipv4', 'taller-subredes', 'capa-red', 'fallas', 'ospf']
+      };
+      var cut = 'first', welcomed = true, storage = true;
+      try {
+        if (/[?&]reset\b/.test(location.search)) {
+          localStorage.removeItem('netlab:welcomed');
+          localStorage.removeItem('netlab:cut');
+        }
+        cut = JSON.parse(localStorage.getItem('netlab:cut')) || 'first';
+        welcomed = localStorage.getItem('netlab:welcomed') === '1';
+      } catch (e) { storage = false; }
+      var nav = '';
+      try { nav = performance.getEntriesByType('navigation')[0].type; } catch (e) {}
+      var hash = (location.hash || '').replace('#', '').replace(/^laboratorio-paso-.*/, 'laboratorio');
+      // Al recargar, el hash que dejó el desplazamiento no cuenta como enlace explícito: se vuelve al inicio normal
+      if (nav === 'reload' && hash) {
+        try { history.replaceState(null, '', location.pathname + location.search.replace(/[?&]reset\b/, '')); } catch (e) {}
+        hash = '';
+      }
+      var explicit = false;
+      ['first', 'second', 'third'].forEach(function (key) {
+        if (ids[key].indexOf(hash) > -1) { cut = key; explicit = true; }
+      });
+      var firstVisit = storage && !welcomed && !explicit;
+      if (firstVisit) cut = 'third';
+      if (['first', 'second', 'third'].indexOf(cut) < 0) cut = 'first';
+      root.setAttribute('data-cut', cut);
+      if (firstVisit) root.setAttribute('data-welcome', 'third');
+      try { if (storage) { localStorage.setItem('netlab:welcomed', '1'); if (firstVisit) localStorage.setItem('netlab:cut', '"third"'); } } catch (e) {}
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      if (!firstVisit && !explicit) root.setAttribute('data-home-start', '1');
     })();
   </script>
   <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/enhancements.css">
+  <link rel="stylesheet" href="css/tercer-corte.css">
+  <link rel="stylesheet" href="css/motion.css">
   <script defer src="js/data.js"></script>
   <script defer src="js/quiz.js"></script>
   <script defer src="js/script.js"></script>
@@ -28,6 +58,13 @@
   <script defer src="js/mac.js"></script>
   <script defer src="js/talleres.js"></script>
   <script defer src="js/video.js"></script>
+  <script defer src="js/tc-figures.js"></script>
+  <script defer src="js/ipcalc.js"></script>
+  <script defer src="js/tc-core.js"></script>
+  <script defer src="js/tc-calculo.js"></script>
+  <script defer src="js/tc-taller.js"></script>
+  <script defer src="js/tc-red.js"></script>
+  <script defer src="js/motion.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
@@ -49,6 +86,7 @@
     <div class="segmented cut-switch" role="group" aria-label="Corte académico" data-cut-switch>
       <button type="button" data-cut-select="first" aria-pressed="true" class="is-active">Corte 1</button>
       <button type="button" data-cut-select="second" aria-pressed="false">Corte 2</button>
+      <button type="button" data-cut-select="third" aria-pressed="false">Corte 3</button>
     </div>
 
     <button class="menu-toggle" type="button" data-menu-button aria-expanded="false" aria-controls="main-menu" aria-label="Abrir menú de capítulos">
@@ -71,6 +109,7 @@
     <div class="segmented segmented--dark cut-switch cut-switch--menu" role="group" aria-label="Corte académico" data-cut-switch>
       <button type="button" data-cut-select="first" aria-pressed="true" class="is-active">Primer corte</button>
       <button type="button" data-cut-select="second" aria-pressed="false">Segundo corte</button>
+      <button type="button" data-cut-select="third" aria-pressed="false">Tercer corte</button>
     </div>
 
     <nav class="chapter-nav" aria-label="Capítulos de NETLAB">
@@ -87,6 +126,13 @@
       <a href="#encapsulamiento" data-nav-link data-cut="second"><span>02</span> Encapsulamiento y PDU</a>
       <a href="#taller-dhcp" data-nav-link data-cut="second"><span>02</span> Taller DHCP</a>
       <a href="#seguridad" data-nav-link data-cut="second"><span>03</span> Seguridad de la red</a>
+      <a href="#estructura-ipv4" data-nav-link data-cut="third"><span>01</span> Estructura IPv4</a>
+      <a href="#subredes" data-nav-link data-cut="third"><span>02</span> Máscaras y subredes</a>
+      <a href="#taller-ipv4" data-nav-link data-cut="third"><span>03</span> Taller IPv4</a>
+      <a href="#taller-subredes" data-nav-link data-cut="third"><span>04</span> Taller 2: subredes</a>
+      <a href="#capa-red" data-nav-link data-cut="third"><span>05</span> Capa de red e IPv6</a>
+      <a href="#fallas" data-nav-link data-cut="third"><span>06</span> Seis fallas</a>
+      <a href="#ospf" data-nav-link data-cut="third"><span>07</span> Reto OSPF</a>
       <a href="#conclusiones" data-nav-link data-cut="both"><span>09</span> Conclusiones</a>
       <a href="#evaluacion" data-nav-link data-cut="both"><span>10</span> Evaluación</a>
       <a href="#glosario" data-nav-link data-cut="both"><span>11</span> Glosario</a>
@@ -115,7 +161,8 @@
           <p class="hero__kicker">Universidad Santo Tomás · Seccional Villavicencio</p>
           <div class="hero__rule" aria-hidden="true"></div>
           <h1>Fundamentos de <span>Redes</span></h1>
-          <p class="hero__lead">Una plataforma educativa para comprender cómo se conectan los dispositivos, cómo viajan los datos y cómo se construye una red desde la teoría hasta Cisco Packet Tracer.</p>
+          <p class="hero__lead" data-cut="first second">Una plataforma educativa para comprender cómo se conectan los dispositivos, cómo viajan los datos y cómo se construye una red desde la teoría hasta Cisco Packet Tracer.</p>
+          <p class="hero__lead" data-cut="third">Tercer corte: cómo se identifica cada equipo con IPv4, cómo se dividen las redes en subredes y cómo un paquete cruza routers con IPv6, rutas estáticas y OSPF, todo comprobado en Cisco Packet Tracer.</p>
 
           <div class="hero__academic" aria-label="Información académica">
             <div><span>Materia</span><strong>Redes</strong></div>
@@ -124,12 +171,14 @@
           </div>
 
           <div class="hero__actions">
-            <button class="button button--primary" type="button" data-scroll-target="fundamentos">Comenzar recorrido</button>
-            <a class="text-link" href="#laboratorio">Ir al laboratorio <span aria-hidden="true">→</span></a>
+            <button class="button button--primary" type="button" data-scroll-start>Comenzar recorrido</button>
+            <a class="text-link" href="#laboratorio" data-cut="first second">Ir al laboratorio <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="#subredes" data-cut="third">Probar la calculadora de subredes <span aria-hidden="true">→</span></a>
           </div>
         </div>
 
         <div class="hero__visual hero__visual--video" data-reveal data-delay="120">
+          <div class="hero-pack" data-cut="first second">
           <!-- Video destacado: visible en la portada sin necesidad de entrar a otro capítulo. -->
           <article class="featured-video" aria-labelledby="featured-video-title">
             <div class="featured-video__topline">
@@ -159,11 +208,30 @@
             <div class="hero__visual-label hero__visual-label--right"><span>CAPA 3</span> IP / Router</div>
             <div class="hero__visual-label hero__visual-label--bottom"><span>WLAN</span> IEEE 802.11</div>
           </div>
+          </div>
+          <article class="route-card" data-cut="third" data-route-card aria-labelledby="route-card-title">
+            <div class="route-card__topline"><span>Capa 3 · en vivo</span><span data-route-card-status>PC0 → PC2</span></div>
+            <h2 id="route-card-title">Un paquete, tres saltos</h2>
+            <p class="route-card__lead">Mira cómo el TTL baja en cada router mientras las direcciones IP de origen y destino no cambian.</p>
+            <div class="route-card__stage">
+              <svg viewBox="0 0 560 190" role="img" aria-label="Paquete que viaja de PC0 a PC2 a través de dos routers" data-route-svg></svg>
+            </div>
+            <dl class="route-card__fields" data-route-fields>
+              <div><dt>TTL</dt><dd data-rc="ttl">255</dd></div>
+              <div><dt>IP origen</dt><dd>192.168.10.10</dd></div>
+              <div><dt>IP destino</dt><dd>192.168.20.10</dd></div>
+              <div><dt>MAC destino</dt><dd data-rc="mac">enlace PC0 → R1</dd></div>
+            </dl>
+            <div class="route-card__footer">
+              <span>Taller de capa de red · Packet Tracer 9.0</span>
+              <a href="#capa-red" aria-label="Ir al simulador de capa de red">Explorar el simulador <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
           <div class="hero__visual-index" aria-hidden="true">CCNA · 01</div>
         </div>
       </div>
 
-      <a class="scroll-cue" href="#fundamentos">
+      <a class="scroll-cue" href="#fundamentos" data-start-link>
         <span>Explorar contenido</span>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v15M6 13l6 6 6-6"/></svg>
       </a>
@@ -197,6 +265,15 @@
               <li>Constructor RJ-45 (T568A y T568B)</li><li>Encapsulamiento, PDU y desencapsulamiento</li><li>Taller: dos redes conectadas con DHCP</li><li>Seguridad en la infraestructura de red</li>
             </ul>
             <button class="button button--primary" type="button" data-cut-select="second">Estudiar el segundo corte</button>
+          </article>
+          <article class="cut-card" data-cut-card="third" data-reveal data-delay="200">
+            <div class="cut-card__top"><span class="cut-card__n">03</span><span class="cut-card__badge">7 capítulos</span></div>
+            <h3>Tercer corte</h3>
+            <p>Estructura y direccionamiento IPv4, máscaras y subredes, IPv6, rutas estáticas, diagnóstico de fallas y OSPF, con tres talleres en Packet Tracer.</p>
+            <ul>
+              <li>Binario, clases y direcciones privadas</li><li>Máscara, AND y número mágico</li><li>Taller IPv4 (cédulas 49 y 78)</li><li>Taller 2: redes /24, /26 y /27, DHCP y APIPA</li><li>Capa de red: IPv6, SLAAC y rutas</li><li>Laboratorio de seis fallas</li><li>Reto: LAN3 y OSPF</li>
+            </ul>
+            <button class="button button--primary" type="button" data-cut-select="third">Estudiar el tercer corte</button>
           </article>
         </div>
       </div>
@@ -1175,6 +1252,968 @@ ip dhcp pool USUARIOS
     </section>
 
     <!-- ==============================
+         TERCER CORTE · 01 Estructura IPv4
+    ================================= -->
+    <section class="chapter chapter--light" id="estructura-ipv4" data-cut="third" data-nav-title="Estructura IPv4">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">01</div>
+          <div>
+            <span class="eyebrow">Taller IPv4 · Parte 1</span>
+            <h2>Cómo está hecha una dirección IPv4</h2>
+            <p>Para una persona, 192.168.49.149 es una dirección. Para un router es una secuencia de 32 bits. Entender la conversión entre ambas lenguas es la base de todo el direccionamiento: máscaras, subredes y rutas parten de ahí.</p>
+          </div>
+        </header>
+
+        <div class="facts" data-reveal>
+          <div><b data-count="32">32</b><span>bits en total</span></div>
+          <div><b data-count="4">4</b><span>octetos</span></div>
+          <div><b data-count="8">8</b><span>bits por octeto</span></div>
+          <div><b>2<sup>32</sup></b><span>direcciones posibles</span></div>
+        </div>
+
+        <div class="lab bitlab" data-reveal data-bitlab>
+          <div class="lab__head">
+            <div>
+              <span class="eyebrow">Laboratorio de bits</span>
+              <h3>Enciende los bits y mira cómo cambia la dirección</h3>
+              <p>Cada bit vale el doble que el de su derecha: 128, 64, 32, 16, 8, 4, 2 y 1. Pulsa un bit para encenderlo o apagarlo, escribe un número en un octeto o carga una de las direcciones del taller.</p>
+            </div>
+            <div class="chips" data-bitlab-presets role="group" aria-label="Direcciones de ejemplo"></div>
+          </div>
+
+          <div class="bitlab__octets" data-bitlab-octets></div>
+
+          <div class="bitlab__readout">
+            <div class="bitlab__address" aria-live="polite">
+              <span class="bitlab__label">Dirección</span>
+              <div class="bitlab__ip" data-bitlab-ip></div>
+              <div class="bitlab__bin" data-bitlab-bin></div>
+            </div>
+            <div class="bitlab__split" data-bitlab-split aria-label="Porción de red y de host con la máscara por defecto"></div>
+          </div>
+
+          <div class="bitlab__grid">
+            <div class="bitlab__method">
+              <span class="bitlab__label" data-bitlab-method-title>Método de la resta</span>
+              <ol data-bitlab-method></ol>
+              <p class="lab__hint">El octeto elegido se descompone restando los pesos 128, 64, 32… de mayor a menor.</p>
+            </div>
+            <dl class="bitlab__class" data-bitlab-class></dl>
+          </div>
+        </div>
+
+        <div class="split-note" data-reveal>
+          <article>
+            <span>Clases</span>
+            <h3>El primer octeto decide la clase</h3>
+            <div class="class-bar" aria-label="Rango de cada clase de dirección">
+              <div style="--w:50%" data-class="A"><b>A</b><small>1 – 126</small></div>
+              <div style="--w:25%" data-class="B"><b>B</b><small>128 – 191</small></div>
+              <div style="--w:12.5%" data-class="C"><b>C</b><small>192 – 223</small></div>
+              <div style="--w:6.25%" data-class="D"><b>D</b><small>224 – 239</small></div>
+              <div style="--w:6.25%" data-class="E"><b>E</b><small>240+</small></div>
+            </div>
+            <p data-class-text>192.168.49.149 empieza en 192, así que es de <b>clase C</b>: máscara por defecto 255.255.255.0 (/24), con tres octetos para la red y uno para los equipos.</p>
+          </article>
+          <article>
+            <span>Direcciones privadas</span>
+            <h3>Tres bloques que Internet no enruta</h3>
+            <ul class="mono-list">
+              <li><b>10.0.0.0/8</b><span>10.0.0.0 – 10.255.255.255</span></li>
+              <li><b>172.16.0.0/12</b><span>172.16.0.0 – 172.31.255.255</span></li>
+              <li><b>192.168.0.0/16</b><span>192.168.0.0 – 192.168.255.255</span></li>
+            </ul>
+            <p>Son las del RFC 1918. Los talleres usan 192.168.N.0 y 172.16.N.0, dos de estos bloques.</p>
+          </article>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#inicio">← Portada</a><a href="#subredes">Máscaras y subredes →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         TERCER CORTE · 02 Máscaras y subredes
+    ================================= -->
+    <section class="chapter chapter--ink" id="subredes" data-cut="third" data-nav-title="Máscaras y subredes">
+      <div class="chapter__shell">
+        <header class="chapter-heading chapter-heading--light" data-reveal>
+          <div class="chapter-heading__index">02</div>
+          <div>
+            <span class="eyebrow eyebrow--light">Taller IPv4 · Partes 2, 3 y 4</span>
+            <h2>Máscara, AND y número mágico</h2>
+            <p>La máscara le dice a un equipo cuántos bits son de red y cuántos de host. Con una operación AND se obtiene la dirección de red; con el número mágico se llega al mismo resultado sin escribir un solo bit.</p>
+          </div>
+        </header>
+
+        <div class="lab lab--dark subnet" data-reveal data-subnet>
+          <div class="subnet__controls">
+            <label class="field">
+              <span>Dirección IPv4</span>
+              <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="192.168.49.149" data-subnet-ip aria-describedby="subnet-error">
+            </label>
+            <label class="field field--range">
+              <span>Prefijo <output data-subnet-prefix-out>/26</output></span>
+              <input type="range" min="8" max="30" step="1" value="26" data-subnet-prefix aria-label="Longitud del prefijo">
+            </label>
+            <button class="button button--primary button--compact" type="button" data-subnet-play>Reproducir el AND</button>
+          </div>
+          <p class="field-error" id="subnet-error" data-subnet-error hidden role="alert"></p>
+          <div class="chips chips--dark" data-subnet-presets role="group" aria-label="Ejercicios del taller"></div>
+
+          <div class="subnet__binary" data-subnet-binary aria-label="Operación AND bit a bit"></div>
+          <div class="subnet__cards" data-subnet-cards></div>
+
+          <div class="subnet__blocks">
+            <div class="subnet__blocks-head">
+              <span class="bitlab__label" data-subnet-blocks-title>Bloques del octeto interesante</span>
+              <span class="subnet__legend"><i class="lg lg--net"></i>Red <i class="lg lg--host"></i>Hosts <i class="lg lg--bc"></i>Broadcast <i class="lg lg--ip"></i>Tu IP</span>
+            </div>
+            <div class="block-bar" data-subnet-blocks></div>
+          </div>
+
+          <div class="subnet__magic">
+            <span class="bitlab__label">Método del número mágico</span>
+            <ol data-subnet-magic></ol>
+          </div>
+        </div>
+
+        <div class="prefix-wrap" data-reveal>
+          <div class="ip-table-head"><h3>De /24 a /30 en una tabla</h3><span>256 − octeto de la máscara = tamaño del bloque</span></div>
+          <div class="table-scroll table-scroll--dark" tabindex="0" aria-label="Tabla de prefijos de /24 a /30">
+            <table data-prefix-table>
+              <thead><tr><th>Prefijo</th><th>Máscara</th><th>Wildcard</th><th>Bits de host</th><th>Bloque</th><th>Hosts útiles</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="formulas" data-reveal>
+          <div class="formulas__head"><span class="eyebrow eyebrow--light">Hoja de fórmulas</span><h3>Todo el taller en diez líneas</h3><p>Pulsa una fórmula para copiarla en tus apuntes.</p></div>
+          <div class="formulas__grid">
+            <button type="button" class="formula" data-copy="h = 32 − prefijo"><span>Bits de host</span><code>h = 32 − prefijo</code></button>
+            <button type="button" class="formula" data-copy="Hosts utilizables = 2^h − 2"><span>Hosts utilizables</span><code>2<sup>h</sup> − 2</code></button>
+            <button type="button" class="formula" data-copy="Red = IP AND máscara"><span>Dirección de red</span><code>IP AND máscara</code></button>
+            <button type="button" class="formula" data-copy="Wildcard = 255.255.255.255 − máscara"><span>Wildcard</span><code>255.255.255.255 − máscara</code></button>
+            <button type="button" class="formula" data-copy="Broadcast = red + wildcard"><span>Broadcast</span><code>red + wildcard</code></button>
+            <button type="button" class="formula" data-copy="HostMin = red + 1 · HostMax = broadcast − 1"><span>Rango útil</span><code>red + 1 … broadcast − 1</code></button>
+            <button type="button" class="formula" data-copy="Número mágico = 256 − octeto de la máscara"><span>Número mágico</span><code>256 − octeto de la máscara</code></button>
+            <button type="button" class="formula" data-copy="Partes 1 y 2: 192.168.N.(N+100) · Parte 3: 172.16.N.(N+150)/28 · Parte 4: 192.168.N.(2×N+Y)/P"><span>Direcciones del taller</span><code>192.168.N.(N+100) · 172.16.N.(N+150)</code></button>
+            <button type="button" class="formula" data-copy="TTL: cada router resta 1 · Hop Limit en IPv6"><span>TTL</span><code>−1 por router</code></button>
+            <button type="button" class="formula" data-copy="Ping local: TTL 128 · router: TTL 255 · tras 2 routers: 126"><span>TTL observado</span><code>128 → 126 tras dos routers</code></button>
+          </div>
+        </div>
+
+        <div class="lab lab--dark trainer" data-reveal data-trainer>
+          <div class="lab__head">
+            <div>
+              <span class="eyebrow eyebrow--light">Entrenador</span>
+              <h3>Resuelve un ejercicio como los del taller</h3>
+              <p>Se genera una dirección con su prefijo. Calcula la red, el broadcast, HostMin, HostMax y los hosts utilizables, y comprueba tus respuestas. Usa la pista si te atascas.</p>
+            </div>
+            <div class="trainer__score" aria-live="polite">
+              <div><b data-trainer-ok>0</b><span>correctos</span></div>
+              <div><b data-trainer-streak>0</b><span>racha</span></div>
+              <div><b data-trainer-best>0</b><span>mejor racha</span></div>
+            </div>
+          </div>
+          <div class="trainer__bar">
+            <div class="segmented segmented--dark" role="group" aria-label="Dificultad" data-trainer-level>
+              <button type="button" class="is-active" data-level="easy" aria-pressed="true">/25 a /27</button>
+              <button type="button" data-level="mid" aria-pressed="false">/26 a /30</button>
+              <button type="button" data-level="hard" aria-pressed="false">/17 a /30</button>
+            </div>
+            <button class="button button--ghost-light button--compact" type="button" data-trainer-new>Nuevo ejercicio</button>
+          </div>
+          <div class="trainer__task"><span>Dirección asignada</span><b data-trainer-task>—</b></div>
+          <form class="trainer__form" data-trainer-form novalidate>
+            <label class="field"><span>Dirección de red</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-t-field="network" placeholder="0.0.0.0"></label>
+            <label class="field"><span>Broadcast</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-t-field="broadcast" placeholder="0.0.0.0"></label>
+            <label class="field"><span>HostMin</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-t-field="hostMin" placeholder="0.0.0.0"></label>
+            <label class="field"><span>HostMax</span><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" data-t-field="hostMax" placeholder="0.0.0.0"></label>
+            <label class="field"><span>Hosts utilizables</span><input type="text" inputmode="numeric" autocomplete="off" data-t-field="usable" placeholder="0"></label>
+            <div class="trainer__actions">
+              <button class="button button--primary" type="submit">Comprobar</button>
+              <button class="button button--ghost-light" type="button" data-trainer-hint>Pista</button>
+              <button class="button button--ghost-light" type="button" data-trainer-reveal>Ver solución</button>
+            </div>
+          </form>
+          <p class="trainer__feedback" data-trainer-feedback aria-live="polite"></p>
+        </div>
+
+        <div class="qa-list" data-reveal>
+          <div class="qa-list__head"><span class="eyebrow eyebrow--light">Preguntas de análisis · Parte 6</span><h3>Cinco ideas que hay que poder explicar</h3></div>
+          <details class="qa" open>
+            <summary><span>¿Por qué se restan dos direcciones en 2<sup>h</sup> − 2?</span><i aria-hidden="true">+</i></summary>
+            <p>La primera dirección del bloque identifica a la propia red y la última es el broadcast. Ambas quedan reservadas y no se asignan a equipos finales. En la red 192.168.49.128/26 se reservan .128 y .191, de modo que 64 direcciones dejan 62 hosts utilizables.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué significa 2<sup>h</sup> y cuántos hosts hay con /25 y /27?</span><i aria-hidden="true">+</i></summary>
+            <p>Representa todas las combinaciones posibles de los bits de host; la base es 2 porque cada bit es 0 o 1. Con /25: h = 7, 2<sup>7</sup> = 128 direcciones y 126 hosts. Con /27: h = 5, 2<sup>5</sup> = 32 direcciones y 30 hosts.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Cuál es la diferencia entre netmask y wildcard?</span><i aria-hidden="true">+</i></summary>
+            <p>La netmask tiene unos en la porción de red y ceros en la de host. La wildcard es su inversa bit a bit. Para 172.16.49.199/28, la netmask es 255.255.255.240 y la wildcard 0.0.0.15. La wildcard reaparece más adelante, en las sentencias <code>network</code> de OSPF.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué pasaría al asignar la dirección de broadcast a un PC?</span><i aria-hidden="true">+</i></summary>
+            <p>No sería una dirección de host válida, porque se reserva para enviar tráfico a toda la subred. En el segundo taller Packet Tracer lo rechazó con el aviso <em>Invalid IP for this subnet mask entered</em> al intentar usar 192.168.49.255/24.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Por qué falló el ping si los PC estaban en el mismo switch?</span><i aria-hidden="true">+</i></summary>
+            <p>El switch conecta equipos en la capa de enlace, pero comunicar redes IP distintas exige enrutamiento. PC1 quedó en 192.168.49.128/26 y el equipo de prueba en 192.168.49.192/26, y el router no tenía ruta hacia la segunda red. Estar en el mismo cable no significa estar en la misma red lógica.</p>
+          </details>
+        </div>
+
+        <nav class="chapter-pager chapter-pager--dark" aria-label="Navegación entre capítulos"><a href="#estructura-ipv4">← Estructura IPv4</a><a href="#taller-ipv4">Taller IPv4 →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         TERCER CORTE · 03 Taller IPv4
+    ================================= -->
+    <section class="chapter" id="taller-ipv4" data-cut="third" data-nav-title="Taller IPv4">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">03</div>
+          <div>
+            <span class="eyebrow">Informe individual · Packet Tracer 9.0</span>
+            <h2>Taller IPv4: una cédula, una red</h2>
+            <p>Cada integrante recibió direcciones calculadas a partir de los dos últimos dígitos de su cédula (N), con una variable Y para el prefijo de la Parte 4. Elige un integrante y recorre las cuatro partes del cálculo y la práctica en Packet Tracer.</p>
+          </div>
+        </header>
+
+        <div class="objectives" data-reveal>
+          <article><span>Objetivo</span><p>Determinar los componentes de las direcciones IPv4 asignadas, demostrar cada operación y verificar la comunicación dentro de una subred /26, incluida una prueba controlada de error por pertenecer a redes diferentes.</p></article>
+          <ul>
+            <li>Convertir direcciones entre decimal y binario.</li>
+            <li>Obtener red, broadcast y rango de hosts con AND y con el número mágico.</li>
+            <li>Configurar R1 y tres PC con direcciones HostMin y HostMax.</li>
+            <li>Provocar y explicar un ping fallido entre subredes.</li>
+          </ul>
+        </div>
+
+        <div class="t1" data-reveal data-t1>
+          <div class="t1__bar">
+            <div class="segmented" role="group" aria-label="Integrante" data-t1-student>
+              <button type="button" class="is-active" data-n="49" aria-pressed="true">Juan José · N = 49</button>
+              <button type="button" data-n="78" aria-pressed="false">Santiago · N = 78</button>
+            </div>
+            <div class="t1__params" data-t1-params></div>
+          </div>
+
+          <div class="t1__addresses" data-t1-addresses></div>
+
+          <div class="t1__tabs segmented" role="tablist" aria-label="Partes del taller" data-t1-parts>
+            <button type="button" role="tab" class="is-active" data-part="1" aria-selected="true">1 · Binario</button>
+            <button type="button" role="tab" data-part="2" aria-selected="false">2 · Prefijo /26</button>
+            <button type="button" role="tab" data-part="3" aria-selected="false">3 · Número mágico /28</button>
+            <button type="button" role="tab" data-part="4" aria-selected="false">4 · Prefijo personalizado</button>
+          </div>
+          <div class="t1__panel" data-t1-panel role="tabpanel" aria-live="polite"></div>
+        </div>
+
+        <div class="pt lab" data-reveal data-t1-pt>
+          <div class="lab__head">
+            <div>
+              <span class="eyebrow">Parte 5 · Práctica en Packet Tracer</span>
+              <h3>Un router, un switch y tres PC en una subred /26</h3>
+              <p>R1 toma la primera dirección utilizable (HostMin), PC1 y PC2 las siguientes y PC3 la última (HostMax). Ejecuta las pruebas del taller y observa por qué una de ellas debe fallar.</p>
+            </div>
+          </div>
+          <div class="pt__grid">
+            <div class="pt__stage">
+              <div class="netviz" data-t1-net></div>
+              <div class="pt__actions">
+                <button type="button" class="button button--primary button--compact" data-t1-test="gw">ping al router</button>
+                <button type="button" class="button button--primary button--compact" data-t1-test="max">ping a HostMax</button>
+                <button type="button" class="button button--ghost button--compact" data-t1-test="far">Mover PC2 a otra subred</button>
+              </div>
+            </div>
+            <div class="pt__side">
+              <div class="terminal" data-t1-terminal aria-live="polite"><div class="terminal__bar"><i></i><i></i><i></i><span>PC1 · Command Prompt</span></div><pre><code data-t1-out>C:\&gt; Elige una prueba para empezar.</code></pre></div>
+              <div class="table-scroll" tabindex="0" aria-label="Plan de direccionamiento">
+                <table data-t1-plan>
+                  <thead><tr><th>Equipo</th><th>Criterio</th><th>IPv4</th><th>Máscara</th><th>Gateway</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <p class="lab__verdict" data-t1-verdict aria-live="polite"></p>
+        </div>
+
+        <div class="cli-block" data-reveal>
+          <div class="cli-block__copy"><span class="eyebrow eyebrow--light">R1 · CLI</span><h3>Configuración del router</h3><p>La interfaz se activa con <code>no shutdown</code>. Con <code>show ip interface brief</code> debe aparecer en <em>up/up</em> con la dirección HostMin.</p></div>
+          <pre aria-label="Comandos de configuración del router"><code>enable
+configure terminal
+hostname R1
+interface gigabitEthernet 0/0/0
+ ip address 192.168.<span data-n-text>49</span>.129 255.255.255.192
+ no shutdown
+end
+copy running-config startup-config
+show ip interface brief</code></pre>
+        </div>
+
+        <div class="evidence-section" data-reveal>
+          <div class="evidence-section__head"><span class="eyebrow">Evidencias</span><h3>Capturas de Packet Tracer</h3><p>Pulsa una captura para ampliarla. Se muestran las de ambos integrantes.</p></div>
+          <div class="evidence-grid evidence-grid--t3" data-fig-grid="ipv4"></div>
+        </div>
+
+        <div class="analysis" data-reveal>
+          <article><span>Mismo switch, distinta red</span><p>Con 192.168.N.198/26 el equipo pasa a la red .192, aunque siga en el mismo cable. El router solo tenía interfaz en .128/26 y respondió «Destination host unreachable».</p></article>
+          <article><span>Identificar y calcular</span><p>Las dos cédulas producen direcciones distintas pero el mismo método. Con /26 ambas redes tienen 62 hosts utilizables y la misma máscara 255.255.255.192.</p></article>
+          <article><span>Un error de sintaxis no invalida</span><p>En la evidencia de 78 aparece «Invalid Command» por escribir dos pings en una línea. Se repitieron por separado y respondieron sin pérdidas.</p></article>
+        </div>
+
+        <div class="pkt-download" data-reveal>
+          <div><span class="eyebrow">Archivo de simulación</span><p>El enunciado exige entregar el archivo .pkt junto al informe. Puedes abrirlo con Cisco Packet Tracer 9.0.</p></div>
+          <a class="button button--ghost button--compact" href="assets/descargas/Taller_IPv4_Montoya.pkt" download>Descargar .pkt <span aria-hidden="true">↓</span></a>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#subredes">← Máscaras y subredes</a><a href="#taller-subredes">Taller 2: subredes →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         TERCER CORTE · 04 Taller 2: subredes
+    ================================= -->
+    <section class="chapter chapter--soft" id="taller-subredes" data-cut="third" data-nav-title="Taller 2: subredes">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">04</div>
+          <div>
+            <span class="eyebrow">Informe grupal · Packet Tracer 9.0</span>
+            <h2>Taller 2: de /24 a /27, DHCP y cabeceras</h2>
+            <p>Ocho puntos que llevan una red desde una LAN /24 hasta dos subredes /27 unidas por un router, con un servidor DHCP y un paquete inspeccionado en modo Simulation. Los cálculos y las capturas son los del caso N = 49.</p>
+          </div>
+        </header>
+
+        <div class="t2-ref" data-reveal>
+          <div class="table-scroll" tabindex="0" aria-label="Redes del caso N = 49">
+            <table>
+              <thead><tr><th>Dato</th><th>Valor</th></tr></thead>
+              <tbody>
+                <tr><td>Red principal · puntos 2 y 3</td><td><code>192.168.49.0/24</code></td></tr>
+                <tr><td>Subred de los puntos 4 y 5</td><td><code>192.168.49.64/26</code></td></tr>
+                <tr><td>LAN A · puntos 6 a 8</td><td><code>172.16.49.0/27</code></td></tr>
+                <tr><td>LAN B · puntos 6 a 8</td><td><code>172.16.49.32/27</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="technical-note">Integrantes: Juan José Montoya (N = 49), Santiago Saray Quevedo (N = 78) y Jefferson Mora (N = 68). Las direcciones de los tres siguen las mismas fórmulas; solo cambia el tercer octeto.</p>
+        </div>
+
+        <div class="t2" data-reveal data-t2>
+          <div class="t2__nav" role="tablist" aria-label="Puntos del taller" data-t2-nav>
+            <button type="button" role="tab" class="is-active" data-point="1" aria-selected="true"><b>01</b><span>Topología</span></button>
+            <button type="button" role="tab" data-point="2" aria-selected="false"><b>02</b><span>Estático /24</span></button>
+            <button type="button" role="tab" data-point="3" aria-selected="false"><b>03</b><span>Gateway</span></button>
+            <button type="button" role="tab" data-point="4" aria-selected="false"><b>04</b><span>Subred /26</span></button>
+            <button type="button" role="tab" data-point="5" aria-selected="false"><b>05</b><span>Error de subred</span></button>
+            <button type="button" role="tab" data-point="6" aria-selected="false"><b>06</b><span>Dos redes /27</span></button>
+            <button type="button" role="tab" data-point="7" aria-selected="false"><b>07</b><span>DHCP y APIPA</span></button>
+            <button type="button" role="tab" data-point="8" aria-selected="false"><b>08</b><span>Cabecera IPv4</span></button>
+          </div>
+          <div class="t2__progress" aria-hidden="true"><span data-t2-bar></span></div>
+
+          <div class="t2__stage">
+            <!-- Punto 1 -->
+            <article class="t2__panel is-active" data-t2-panel="1" role="tabpanel">
+              <div class="t2__text">
+                <span class="eyebrow">Punto 1</span>
+                <h3>Construcción de la topología base</h3>
+                <p>Se usó un router ISR4331, un switch 2960-24TT y tres PC-PT, conectados con cable Copper Straight-Through. El router quedó con el nombre <code>R1-49</code>.</p>
+                <div class="table-scroll" tabindex="0" aria-label="Conexiones del punto 1">
+                  <table>
+                    <thead><tr><th>Origen</th><th>Destino</th></tr></thead>
+                    <tbody>
+                      <tr><td>PC1 Fa0</td><td>S1 Fa0/1</td></tr>
+                      <tr><td>PC2 Fa0</td><td>S1 Fa0/2</td></tr>
+                      <tr><td>PC3 Fa0</td><td>S1 Fa0/3</td></tr>
+                      <tr><td>S1 Gig0/1</td><td>R1 Gig0/0/0</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="qa-answer"><span>Pregunta</span><p><b>¿Por qué el router queda en rojo y los demás en verde?</b> Los puertos de PC y switch se habilitan al conectarse. Las interfaces de un router Cisco pueden estar administrativamente deshabilitadas y requieren <code>no shutdown</code>.</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-topologia-base"></figure></div>
+            </article>
+
+            <!-- Punto 2 -->
+            <article class="t2__panel" data-t2-panel="2" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 2</span>
+                <h3>Direccionamiento estático en una /24</h3>
+                <p>Se asignaron direcciones en <code>Desktop → IP Configuration → Static</code> con máscara 255.255.255.0 y sin gateway. Cada PC toma N más 10, 20 y 30 como último octeto.</p>
+                <div class="table-scroll" tabindex="0" aria-label="Direcciones del punto 2">
+                  <table>
+                    <thead><tr><th>Equipo</th><th>Cálculo</th><th>Dirección</th></tr></thead>
+                    <tbody>
+                      <tr><td>PC1</td><td>49 + 10</td><td><code>192.168.49.59</code></td></tr>
+                      <tr><td>PC2</td><td>49 + 20</td><td><code>192.168.49.69</code></td></tr>
+                      <tr><td>PC3</td><td>49 + 30</td><td><code>192.168.49.79</code></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="qa-answer"><span>Pregunta</span><p><b>¿Cuántos hosts hay y para qué sirve 127.0.0.1?</b> Con /24 quedan 8 bits de host: 2<sup>8</sup> − 2 = 254. El loopback se procesa dentro del propio equipo y comprueba la pila TCP/IP sin tocar el cable.</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-ipconfig-ping"></figure><figure data-fig="t2-78-loopback"></figure></div>
+            </article>
+
+            <!-- Punto 3 -->
+            <article class="t2__panel" data-t2-panel="3" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 3</span>
+                <h3>El router como puerta de enlace: HostMin y HostMax</h3>
+                <p>R1 recibe la primera dirección utilizable de la /24 y PC3 la última. Al intentar poner el broadcast en PC2, Packet Tracer lo rechazó.</p>
+                <div class="table-scroll" tabindex="0" aria-label="Direcciones del punto 3">
+                  <table>
+                    <thead><tr><th>Elemento</th><th>Dirección</th></tr></thead>
+                    <tbody>
+                      <tr><td>R1 Gig0/0/0 · HostMin</td><td><code>192.168.49.1</code></td></tr>
+                      <tr><td>PC3 · HostMax</td><td><code>192.168.49.254</code></td></tr>
+                      <tr><td>Broadcast</td><td><code>192.168.49.255</code></td></tr>
+                      <tr><td>Gateway de los tres PC</td><td><code>192.168.49.1</code></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="qa-answer"><span>Resultado</span><p>El aviso <em>Invalid IP for this subnet mask entered</em> confirma que .255 es el broadcast de la red y no puede asignarse a un equipo. El ping de PC3 al gateway respondió 4/4 con TTL 255.</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-router-24"></figure><figure data-fig="t2-ip-invalida"></figure><figure data-fig="t2-ping-gateway"></figure></div>
+            </article>
+
+            <!-- Punto 4 -->
+            <article class="t2__panel" data-t2-panel="4" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 4</span>
+                <h3>Cálculo y configuración de la subred /26</h3>
+                <p>Con /26 quedan 6 bits de host: 2<sup>6</sup> = 64 direcciones y 62 útiles. El salto entre subredes es 256 − 192 = 64: las redes empiezan en .0, .64, .128 y .192. Se usó la segunda, 192.168.49.64/26.</p>
+                <div class="table-scroll" tabindex="0" aria-label="Cálculos del punto 4">
+                  <table>
+                    <thead><tr><th>Dato</th><th>Resultado</th></tr></thead>
+                    <tbody>
+                      <tr><td>Netmask · Wildcard</td><td><code>255.255.255.192</code> · <code>0.0.0.63</code></td></tr>
+                      <tr><td>Red · Broadcast</td><td><code>192.168.49.64</code> · <code>192.168.49.127</code></td></tr>
+                      <tr><td>R1 · HostMin</td><td><code>192.168.49.65</code></td></tr>
+                      <tr><td>PC1 · PC2</td><td><code>192.168.49.66</code> · <code>192.168.49.67</code></td></tr>
+                      <tr><td>PC3 · HostMax</td><td><code>192.168.49.126</code></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="qa-answer"><span>Resultado</span><p>Desde PC1 se recibieron cuatro respuestas de .65, .67 y .126, sin pérdidas. El gateway de los tres PC pasó a ser 192.168.49.65.</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-running-26"></figure><figure data-fig="t2-ping-26"></figure></div>
+            </article>
+
+            <!-- Punto 5 -->
+            <article class="t2__panel" data-t2-panel="5" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 5</span>
+                <h3>Error de subred: la máscara separa</h3>
+                <p>Al cambiar solo la IP de PC2 a 192.168.49.130, el ping desde PC1 devolvió «Destination host unreachable» desde 192.168.49.65, con 100 % de pérdida. Compruébalo tú: ¿en qué red cae cada dirección?</p>
+                <div class="samenet" data-samenet>
+                  <div class="samenet__row">
+                    <label class="field"><span>PC1</span><input type="text" value="192.168.49.66" inputmode="decimal" autocomplete="off" spellcheck="false" data-samenet-a></label>
+                    <label class="field"><span>PC2</span><input type="text" value="192.168.49.130" inputmode="decimal" autocomplete="off" spellcheck="false" data-samenet-b></label>
+                    <label class="field field--short"><span>Prefijo</span><input type="number" min="8" max="30" value="26" data-samenet-p></label>
+                  </div>
+                  <div class="chips" role="group" aria-label="Casos">
+                    <button type="button" class="chip-button chip-button--ink" data-samenet-preset="192.168.49.67">PC2 = .67 (correcto)</button>
+                    <button type="button" class="chip-button chip-button--ink" data-samenet-preset="192.168.49.130">PC2 = .130 (error)</button>
+                    <button type="button" class="chip-button chip-button--ink" data-samenet-preset="192.168.49.126">PC2 = .126 (HostMax)</button>
+                  </div>
+                  <div class="samenet__out" data-samenet-out aria-live="polite"></div>
+                </div>
+                <div class="qa-answer"><span>Explicación</span><p>130 = 10000010₂ y 192 = 11000000₂; el AND da 10000000₂ = 128. PC2 pertenece a 192.168.49.128/26 y PC1 a .64/26. Compartir el switch no los une: haría falta un router con interfaz o ruta hacia la otra red.</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-error-subred"></figure><figure data-fig="t2-simulation"></figure></div>
+            </article>
+
+            <!-- Punto 6 -->
+            <article class="t2__panel" data-t2-panel="6" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 6</span>
+                <h3>Dos redes /27 unidas por el router</h3>
+                <p>Con /27 quedan 5 bits de host: 30 hosts útiles por subred. R1 usa una interfaz en cada LAN y las dos aparecen como rutas conectadas, por eso no hacen falta rutas estáticas.</p>
+                <div class="table-scroll" tabindex="0" aria-label="Direcciones de las LAN A y B">
+                  <table>
+                    <thead><tr><th>LAN A · 172.16.49.0/27</th><th>LAN B · 172.16.49.32/27</th></tr></thead>
+                    <tbody>
+                      <tr><td>R1 Gig0/0/0 · <code>.1</code></td><td>R1 Gig0/0/1 · <code>.33</code></td></tr>
+                      <tr><td>PC1 · <code>.2</code></td><td>PC4 · HostMax <code>.62</code></td></tr>
+                      <tr><td>PC2 · HostMax <code>.30</code></td><td>Broadcast <code>.63</code></td></tr>
+                      <tr><td>Broadcast <code>.31</code></td><td></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="mini-lab" data-t2-net-wrap>
+                  <div class="netviz netviz--compact" data-t2-net></div>
+                  <button type="button" class="button button--primary button--compact" data-t2-tracert>tracert de PC1 a PC4</button>
+                  <pre class="terminal terminal--inline" aria-live="polite"><code data-t2-tracert-out>C:\&gt; Pulsa el botón para seguir el recorrido.</code></pre>
+                </div>
+                <div class="qa-answer"><span>Pregunta</span><p><b>¿Por qué el primer salto es 172.16.49.1?</b> PC1 envía a su gateway todo destino que pertenezca a otra subred. R1 reenvía por Gig0/0/1 y la traza termina en PC4 (172.16.49.62).</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-topologia-27"></figure><figure data-fig="t2-show-ip-route"></figure><figure data-fig="t2-tracert"></figure></div>
+            </article>
+
+            <!-- Punto 7 -->
+            <article class="t2__panel" data-t2-panel="7" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 7</span>
+                <h3>DHCP en la LAN B y la dirección APIPA</h3>
+                <p>R1 entrega direcciones de la LAN B con el pool <code>LAN-B</code>. Se excluyó de .33 a .37 y se entregó el gateway .33, así que la primera dirección libre es .38. Enciende y apaga el servidor para ver la diferencia.</p>
+                <div class="dhcp2" data-dhcp2>
+                  <div class="dhcp2__controls">
+                    <label class="switch"><input type="checkbox" checked data-dhcp2-server><span class="switch__track"><i></i></span><span>Servidor DHCP en R1</span></label>
+                    <button class="button button--primary button--compact" type="button" data-dhcp2-request>PC5: solicitar dirección</button>
+                    <button class="button button--ghost button--compact" type="button" data-dhcp2-reset>Reiniciar</button>
+                  </div>
+                  <ol class="dora" data-dhcp2-steps aria-label="Mensajes DHCP">
+                    <li data-step="discover"><b>Discover</b><span>PC5 busca un servidor</span></li>
+                    <li data-step="offer"><b>Offer</b><span>R1 ofrece .38</span></li>
+                    <li data-step="request"><b>Request</b><span>PC5 acepta la oferta</span></li>
+                    <li data-step="ack"><b>Ack</b><span>R1 confirma la concesión</span></li>
+                  </ol>
+                  <div class="dhcp2__cells" data-dhcp2-cells aria-label="Direcciones 172.16.49.32 a 172.16.49.63"></div>
+                  <div class="dhcp2__legend"><span class="is-net">Red / broadcast</span><span class="is-excluded">Excluida</span><span class="is-free">Disponible</span><span class="is-leased">Concedida</span><span class="is-apipa">APIPA</span></div>
+                  <div class="dhcp2__result" data-dhcp2-result aria-live="polite">PC5 aún no tiene dirección.</div>
+                </div>
+                <div class="qa-answer"><span>Pregunta</span><p><b>¿Qué indica 169.254.x.x?</b> Es el rango de enlace local que usa APIPA cuando un equipo no obtiene respuesta de un servidor DHCP. Permite hablar solo con vecinos del mismo segmento y no equivale a la configuración correcta de la LAN B. <em>La captura de APIPA no se incluye en el informe: aquí se explica la teoría, no un valor observado.</em></p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-dhcp-pc5"></figure><figure data-fig="t2-dhcp-binding"></figure><figure data-fig="t2-ping-pc5"></figure></div>
+            </article>
+
+            <!-- Punto 8 -->
+            <article class="t2__panel" data-t2-panel="8" role="tabpanel" hidden>
+              <div class="t2__text">
+                <span class="eyebrow">Punto 8</span>
+                <h3>Estructura del paquete IPv4 en modo Simulation</h3>
+                <p>Se generó un paquete ICMP de PC1 (172.16.49.2) a PC4 (172.16.49.62) y se comparó su cabecera al salir de PC1 y al salir de R1.</p>
+                <div class="ttl-lab" data-ttl-lab>
+                  <div class="ttl-lab__stage"><div class="netviz netviz--compact" data-ttl-net></div></div>
+                  <div class="ttl-lab__fields" aria-live="polite">
+                    <div data-f="ver"><span>Versión</span><b>4</b></div>
+                    <div data-f="ttl" class="is-key"><span>TTL</span><b data-ttl-value>255</b></div>
+                    <div data-f="pro"><span>Protocolo</span><b>0x01 · ICMP</b></div>
+                    <div data-f="src"><span>SRC IP</span><b>172.16.49.2</b></div>
+                    <div data-f="dst"><span>DST IP</span><b>172.16.49.62</b></div>
+                    <div data-f="mac"><span>MAC de enlace</span><b data-ttl-mac>PC1 → R1</b></div>
+                  </div>
+                  <div class="ttl-lab__actions">
+                    <button type="button" class="button button--primary button--compact" data-ttl-send>Enviar paquete</button>
+                    <span class="ttl-lab__caption" data-ttl-caption>El TTL parte en 255 al salir de PC1.</span>
+                  </div>
+                </div>
+                <div class="qa-answer"><span>Resultado</span><p>El campo que cambió fue el <b>TTL</b>: 255 al salir de PC1 y 254 al salir de R1. Cada router lo reduce en uno para que ningún paquete circule indefinidamente. Las IP de origen y destino no cambiaron porque no hay traducción de direcciones; las MAC sí se reemplazan en cada enlace.</p></div>
+              </div>
+              <div class="t2__media"><figure data-fig="t2-header-pc1"></figure><figure data-fig="t2-header-r1"></figure></div>
+            </article>
+          </div>
+
+          <div class="t2__footer">
+            <button type="button" class="button button--ghost button--compact" data-t2-prev>← Punto anterior</button>
+            <span data-t2-count>Punto 1 de 8</span>
+            <button type="button" class="button button--primary button--compact" data-t2-next>Siguiente punto →</button>
+          </div>
+        </div>
+
+        <div class="conclusion-note" data-reveal>
+          <span class="eyebrow">Conclusión</span>
+          <p>Las comunicaciones dentro de una misma subred pueden resolverse con un switch, pero conectar subredes distintas exige una puerta de enlace y enrutamiento. El error provocado con 192.168.49.130/26 mostró que compartir el medio físico no significa pertenecer a la misma red lógica, y la comparación de cabeceras confirmó que el TTL baja de 255 a 254 al cruzar R1 mientras las IP de los extremos se conservan.</p>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#taller-ipv4">← Taller IPv4</a><a href="#capa-red">Capa de red e IPv6 →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         TERCER CORTE · 05 Capa de red, IPv6 y rutas
+    ================================= -->
+    <section class="chapter chapter--ink" id="capa-red" data-cut="third" data-nav-title="Capa de red e IPv6">
+      <div class="chapter__shell">
+        <header class="chapter-heading chapter-heading--light" data-reveal>
+          <div class="chapter-heading__index">05</div>
+          <div>
+            <span class="eyebrow eyebrow--light">Taller de capa de red · Packet Tracer 9.0</span>
+            <h2>Capa de red: IPv4, IPv6 y rutas</h2>
+            <p>Dos routers, tres LAN y un enlace /30. Aquí se ve qué hace un paquete en cada salto, por qué sin rutas de ida y de vuelta no hay conversación y cómo IPv6 resuelve el direccionamiento de otra manera.</p>
+          </div>
+        </header>
+
+        <div class="lab lab--dark netsim" data-reveal data-netsim>
+          <div class="lab__head">
+            <div>
+              <span class="eyebrow eyebrow--light">Simulador de enrutamiento</span>
+              <h3>Sigue un paquete de punta a punta</h3>
+              <p>Elige origen y destino, decide qué rutas tiene cada router y pulsa «Enviar». Observa el TTL, las MAC y la tabla de rutas que consulta cada router.</p>
+            </div>
+          </div>
+
+          <div class="netsim__controls">
+            <label class="field"><span>Origen</span><select data-ns-src aria-label="Origen del paquete"></select></label>
+            <label class="field"><span>Destino</span><select data-ns-dst aria-label="Destino del paquete"></select></label>
+            <div class="segmented segmented--dark" role="group" aria-label="Protocolo" data-ns-proto>
+              <button type="button" class="is-active" data-proto="v4" aria-pressed="true">IPv4</button>
+              <button type="button" data-proto="v6" aria-pressed="false">IPv6</button>
+            </div>
+            <div class="segmented segmented--dark" role="group" aria-label="Enrutamiento" data-ns-routing>
+              <button type="button" data-routing="none" aria-pressed="false">Sin rutas</button>
+              <button type="button" data-routing="oneway" aria-pressed="false">Solo ida</button>
+              <button type="button" class="is-active" data-routing="static" aria-pressed="true">Estáticas</button>
+              <button type="button" data-routing="ospf" aria-pressed="false">OSPF</button>
+            </div>
+            <label class="switch switch--dark"><input type="checkbox" data-ns-arp><span class="switch__track"><i></i></span><span>Caché ARP vacía</span></label>
+            <button class="button button--primary" type="button" data-ns-send>Enviar paquete</button>
+          </div>
+
+          <div class="netsim__grid">
+            <div class="netsim__stage">
+              <div class="netviz netviz--dark" data-ns-net></div>
+              <p class="netsim__status" data-ns-status aria-live="polite">Listo para enviar.</p>
+            </div>
+            <div class="netsim__side">
+              <div class="inspector" data-ns-inspector aria-live="polite">
+                <div class="inspector__head"><span>Paquete en el salto</span><b data-ns-hop>—</b></div>
+                <dl>
+                  <div><dt data-ns-ttl-label>TTL</dt><dd data-ns-ttl>—</dd></div>
+                  <div><dt>IP origen</dt><dd data-ns-sip>—</dd></div>
+                  <div><dt>IP destino</dt><dd data-ns-dip>—</dd></div>
+                  <div><dt>MAC origen</dt><dd data-ns-smac>—</dd></div>
+                  <div><dt>MAC destino</dt><dd data-ns-dmac>—</dd></div>
+                </dl>
+                <p class="inspector__note" data-ns-note>Los valores de MAC y TTL de PC0 → PC2 son los observados en el informe.</p>
+              </div>
+              <div class="route-table" data-ns-routes aria-live="polite"></div>
+            </div>
+          </div>
+          <ol class="eventlog" data-ns-log aria-label="Eventos de la simulación"></ol>
+        </div>
+
+        <div class="lookup lab--dark" data-reveal data-lookup>
+          <div class="lookup__copy">
+            <span class="eyebrow eyebrow--light">Ruta más específica</span>
+            <h3>¿Qué hace R2 con un paquete para 172.16.5.5?</h3>
+            <p>El router elige la entrada de la tabla con el prefijo más largo que coincida. Si solo coincide la ruta por defecto, la usa; si no hay ninguna, descarta el paquete.</p>
+            <label class="field"><span>Destino</span><input type="text" value="172.16.5.5" inputmode="decimal" autocomplete="off" spellcheck="false" data-lookup-ip></label>
+            <div class="chips chips--dark" role="group" aria-label="Destinos de ejemplo">
+              <button type="button" class="chip-button" data-lookup-preset="192.168.10.20">192.168.10.20</button>
+              <button type="button" class="chip-button" data-lookup-preset="192.168.20.10">192.168.20.10</button>
+              <button type="button" class="chip-button" data-lookup-preset="172.16.5.5">172.16.5.5</button>
+              <button type="button" class="chip-button" data-lookup-preset="10.0.0.1">10.0.0.1</button>
+            </div>
+            <div class="segmented segmented--dark" role="group" aria-label="Tabla de R2" data-lookup-mode>
+              <button type="button" class="is-active" data-default="1" aria-pressed="true">Con ruta por defecto</button>
+              <button type="button" data-default="0" aria-pressed="false">Sin ruta por defecto</button>
+            </div>
+          </div>
+          <div class="lookup__table">
+            <div class="route-table route-table--solo" data-lookup-table></div>
+            <p class="lookup__verdict" data-lookup-verdict aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="v6grid" data-reveal>
+          <div class="lab lab--dark v6" data-ipv6>
+            <span class="eyebrow eyebrow--light">IPv6 · abreviar y expandir</span>
+            <h3>Una dirección de 128 bits en ocho grupos</h3>
+            <p>Dos reglas: se quitan los ceros a la izquierda de cada grupo y una sola racha de grupos en cero puede sustituirse por <code>::</code>. Escribe una dirección y mira cada paso.</p>
+            <label class="field"><span>Dirección IPv6</span><input type="text" value="2001:0DB8:ACAD:0010:0000:0000:0000:0001" autocomplete="off" spellcheck="false" data-v6-input></label>
+            <div class="chips chips--dark" data-v6-presets role="group" aria-label="Ejemplos del taller"></div>
+            <div class="v6__groups" data-v6-groups aria-label="Los ocho grupos"></div>
+            <dl class="v6__out">
+              <div><dt>Expandida</dt><dd data-v6-full>—</dd></div>
+              <div><dt>Sin ceros iniciales</dt><dd data-v6-trim>—</dd></div>
+              <div><dt>Abreviada</dt><dd data-v6-short>—</dd></div>
+            </dl>
+            <p class="field-error" data-v6-error hidden role="alert"></p>
+          </div>
+
+          <div class="lab lab--dark v6" data-eui>
+            <span class="eyebrow eyebrow--light">SLAAC · identificador EUI-64</span>
+            <h3>Cómo el PC arma su propia dirección</h3>
+            <p>R1 anuncia el prefijo <code>2001:DB8:ACAD:10::/64</code>; el PC completa los 64 bits restantes a partir de su MAC: parte la MAC, inserta <code>FFFE</code> y invierte el séptimo bit.</p>
+            <label class="field"><span>Dirección MAC</span><input type="text" value="0006.2AE7.3E35" autocomplete="off" spellcheck="false" data-eui-input></label>
+            <div class="chips chips--dark" data-eui-presets role="group" aria-label="MAC del informe"></div>
+            <div class="eui__steps" data-eui-steps aria-live="polite"></div>
+            <dl class="v6__out">
+              <div><dt>Identificador de interfaz</dt><dd data-eui-id>—</dd></div>
+              <div><dt>Dirección global (SLAAC)</dt><dd data-eui-global>—</dd></div>
+              <div><dt>Link-local</dt><dd data-eui-link>—</dd></div>
+            </dl>
+            <p class="field-error" data-eui-error hidden role="alert"></p>
+          </div>
+        </div>
+
+        <div class="compare" data-reveal>
+          <div class="ip-table-head"><h3>IPv4 e IPv6, lado a lado</h3><span>Lo que cambió en la configuración del taller</span></div>
+          <div class="table-scroll table-scroll--dark" tabindex="0" aria-label="Comparación entre IPv4 e IPv6">
+            <table>
+              <thead><tr><th></th><th>IPv4</th><th>IPv6</th></tr></thead>
+              <tbody>
+                <tr><td>Tamaño</td><td>32 bits</td><td>128 bits</td></tr>
+                <tr><td>Máscara</td><td>Decimal o prefijo (255.255.255.0 = /24)</td><td>Solo prefijo (/64 en las LAN)</td></tr>
+                <tr><td>Contador de saltos</td><td>TTL</td><td>Hop Limit</td></tr>
+                <tr><td>Resolver la dirección del vecino</td><td>ARP</td><td>Neighbor Discovery (ICMPv6)</td></tr>
+                <tr><td>Autoconfiguración</td><td>DHCP o APIPA (169.254.x.x)</td><td>SLAAC con Router Advertisement</td></tr>
+                <tr><td>Gateway del PC</td><td>IP del router (192.168.10.1)</td><td>Link-local del router (FE80::1)</td></tr>
+                <tr><td>Reenvío en el router</td><td>Activo por defecto</td><td>Requiere <code>ipv6 unicast-routing</code></td></tr>
+                <tr><td>Ruta estática</td><td><code>ip route</code></td><td><code>ipv6 route</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="three-ip" data-reveal>
+          <div class="three-ip__head"><span class="eyebrow eyebrow--light">Reflexión final</span><h3>Las tres características de IP, vistas en el laboratorio</h3></div>
+          <div class="three-ip__grid">
+            <article><b>Sin conexión</b><p>Los equipos enviaron paquetes sin abrir antes una sesión de red. Cada paquete se trata de forma independiente.</p></article>
+            <article><b>Máximo esfuerzo</b><p>Al apagar una interfaz o retirar rutas, los mensajes se perdieron sin aviso de entrega. IP no garantiza que lleguen.</p></article>
+            <article><b>Independiente del medio</b><p>Las decisiones de enrutamiento se basaron en las IP mientras las tramas Ethernet y sus MAC cambiaban en cada enlace.</p></article>
+          </div>
+        </div>
+
+        <div class="qa-list" data-reveal>
+          <div class="qa-list__head"><span class="eyebrow eyebrow--light">Preguntas del taller</span><h3>Respuestas del informe</h3></div>
+          <details class="qa">
+            <summary><span>¿Por qué entre R1 y R2 se usa cable cruzado y entre switch y router, directo?</span><i aria-hidden="true">+</i></summary>
+            <p>Tradicionalmente el cruzado conecta equipos del mismo tipo (router con router) y el directo equipos de categorías distintas. Con Auto-MDIX el enlace también funciona con el cable «equivocado», como se comprobó en la falla 6.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Por qué el enlace entre routers usa /30 y no /24?</span><i aria-hidden="true">+</i></summary>
+            <p>Solo se necesitan dos direcciones, una por router. Una /30 ofrece exactamente dos hosts útiles (10.0.0.1 y 10.0.0.2); una /24 reservaría 254 direcciones que no se usarían.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Por qué al principio no funcionaba el ping entre LAN1 y LAN2?</span><i aria-hidden="true">+</i></summary>
+            <p>Aunque los equipos tenían direcciones correctas, R1 no conocía la ruta hacia 192.168.20.0/24 y R2 no tenía el camino de regreso a 192.168.10.0/24. El enrutamiento debe estar completo en ambos sentidos: la prueba intermedia, con ruta de ida pero sin regreso, perdió los cuatro paquetes.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué parte de la dirección SLAAC llega del router y cuál genera el PC?</span><i aria-hidden="true">+</i></summary>
+            <p>R1 anuncia el prefijo 2001:DB8:ACAD:10::/64 en un Router Advertisement y el PC completa el identificador de interfaz. No hace falta un servidor DHCPv6.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué significa [1/0] en una ruta estática?</span><i aria-hidden="true">+</i></summary>
+            <p>El 1 es la distancia administrativa (la preferencia entre mecanismos de enrutamiento) y el 0 es la métrica mostrada. Una ruta estática con S* y gateway of last resort 10.0.0.1 es la ruta por defecto de R2.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Por qué la respuesta llega con TTL 126 y no 254?</span><i aria-hidden="true">+</i></summary>
+            <p>Los ping de consola parten de un TTL inicial de 128 en el host que responde y atraviesan dos routers: 128 − 2 = 126. En Simulation, el paquete creado con Add Simple PDU parte de 255 y llega con 254 tras R1 y 253 tras R2.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué campo sustituye al TTL en IPv6 y qué reemplaza a ARP?</span><i aria-hidden="true">+</i></summary>
+            <p>IPv6 usa Hop Limit, que también baja en cada router, y Neighbor Discovery con mensajes ICMPv6 (Neighbor Solicitation y Advertisement) en lugar de ARP.</p>
+          </details>
+        </div>
+
+        <div class="evidence-section evidence-section--dark" data-reveal>
+          <div class="evidence-section__head"><span class="eyebrow eyebrow--light">Evidencias</span><h3>Capturas del taller de capa de red</h3><p>Cada captura se rotula según lo que muestra; se amplían con un clic.</p></div>
+          <div class="evidence-grid evidence-grid--t3" data-fig-grid="cr-a"></div>
+        </div>
+
+        <nav class="chapter-pager chapter-pager--dark" aria-label="Navegación entre capítulos"><a href="#taller-subredes">← Taller 2: subredes</a><a href="#fallas">Seis fallas →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         TERCER CORTE · 06 Seis fallas
+    ================================= -->
+    <section class="chapter chapter--light" id="fallas" data-cut="third" data-nav-title="Seis fallas">
+      <div class="chapter__shell">
+        <header class="chapter-heading" data-reveal>
+          <div class="chapter-heading__index">06</div>
+          <div>
+            <span class="eyebrow">Solución de problemas</span>
+            <h2>Laboratorio de diagnóstico: seis fallas</h2>
+            <p>En el taller se provocó cada problema por separado, se observó el síntoma, se diagnosticó con comandos y se restauró la configuración. Haz lo mismo aquí: inyecta una falla, ejecuta los comandos y decide qué corregir. Dos de los resultados no fueron los que se esperaban.</p>
+          </div>
+        </header>
+
+        <div class="lab faultlab" data-reveal data-faultlab>
+          <div class="faultlab__faults" role="tablist" aria-label="Fallas" data-fl-list></div>
+
+          <div class="faultlab__grid">
+            <div class="faultlab__stage">
+              <div class="netviz" data-fl-net></div>
+              <div class="faultlab__state" data-fl-state aria-live="polite"></div>
+            </div>
+
+            <div class="faultlab__console">
+              <div class="faultlab__steps" data-fl-steps>
+                <button type="button" class="step is-active" data-fl-step="inject"><b>1</b><span>Inyectar la falla</span></button>
+                <button type="button" class="step" data-fl-step="diagnose"><b>2</b><span>Diagnosticar</span></button>
+                <button type="button" class="step" data-fl-step="fix"><b>3</b><span>Corregir</span></button>
+              </div>
+              <div class="faultlab__panel" data-fl-panel aria-live="polite"></div>
+              <div class="terminal terminal--tall" data-fl-terminal>
+                <div class="terminal__bar"><i></i><i></i><i></i><span data-fl-term-title>PC0 · Command Prompt</span></div>
+                <pre><code data-fl-out>Elige una falla y pulsa «Inyectar».</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="faultlab__lesson" data-fl-lesson hidden>
+            <span class="eyebrow">Qué enseña esta falla</span>
+            <p data-fl-lesson-text></p>
+            <figure data-fl-figure></figure>
+          </div>
+        </div>
+
+        <div class="surprises" data-reveal>
+          <article>
+            <span>Resultado inesperado · falla 3</span>
+            <h3>Una máscara errónea que «funcionó»</h3>
+            <p>Con 255.255.0.0 en un PC de LAN1, los ping al gateway y a LAN2 siguieron respondiendo. Una explicación posible es Proxy ARP, pero <b>no se verificó</b> en la configuración del router; el informe solo registra lo observado. Moraleja: que el ping responda no prueba que la configuración sea correcta.</p>
+          </article>
+          <article>
+            <span>Resultado inesperado · falla 6</span>
+            <h3>Un cable directo entre routers</h3>
+            <p>El enlace no se cayó y el ping a 10.0.0.2 respondió 4 de 5 paquetes (80 %). Es compatible con Auto-MDIX, que adapta el medio automáticamente en los equipos del simulador. En un equipo real sin esa función el resultado habría sido distinto.</p>
+          </article>
+        </div>
+
+        <div class="evidence-section" data-reveal>
+          <div class="evidence-section__head"><span class="eyebrow">Evidencias</span><h3>Una captura por cada falla</h3></div>
+          <div class="evidence-grid evidence-grid--t3" data-fig-grid="cr-b"></div>
+        </div>
+
+        <nav class="chapter-pager" aria-label="Navegación entre capítulos"><a href="#capa-red">← Capa de red e IPv6</a><a href="#ospf">Reto OSPF →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
+         TERCER CORTE · 07 Reto OSPF
+    ================================= -->
+    <section class="chapter chapter--ink" id="ospf" data-cut="third" data-nav-title="Reto OSPF">
+      <div class="chapter__shell">
+        <header class="chapter-heading chapter-heading--light" data-reveal>
+          <div class="chapter-heading__index">07</div>
+          <div>
+            <span class="eyebrow eyebrow--light">Reto · LAN3 y routing dinámico</span>
+            <h2>De las rutas estáticas a OSPF</h2>
+            <p>Añadir una tercera LAN obliga a tocar a R1. Con rutas estáticas hay que escribir cada destino; con OSPF los routers se lo cuentan entre sí. Compara los dos caminos y mira cómo dos routers se hacen vecinos.</p>
+          </div>
+        </header>
+
+        <div class="lab lab--dark ospf" data-reveal data-ospf>
+          <div class="ospf__bar">
+            <div class="segmented segmented--dark" role="group" aria-label="Método de enrutamiento" data-ospf-mode>
+              <button type="button" class="is-active" data-mode="static" aria-pressed="true">Rutas estáticas</button>
+              <button type="button" data-mode="ospf" aria-pressed="false">OSPF</button>
+            </div>
+            <button class="button button--primary button--compact" type="button" data-ospf-run>Añadir LAN3 a la red</button>
+            <button class="button button--ghost-light button--compact" type="button" data-ospf-reset>Reiniciar</button>
+          </div>
+
+          <div class="ospf__grid">
+            <div class="ospf__col">
+              <span class="bitlab__label">Comandos que se agregan en R1</span>
+              <pre class="ospf__cmds" aria-live="polite"><code data-ospf-cmds></code></pre>
+              <div class="ospf__count"><b data-ospf-count>0</b><span data-ospf-count-label>comandos específicos hacia LAN3</span></div>
+            </div>
+            <div class="ospf__col">
+              <span class="bitlab__label">Tabla de rutas de R1</span>
+              <div class="route-table" data-ospf-table aria-live="polite"></div>
+            </div>
+          </div>
+
+          <div class="ospf__fsm" aria-label="Estados de la vecindad OSPF">
+            <div class="ospf__link">
+              <div class="ospf__router"><b>R1</b><small>Router ID 192.168.10.1</small></div>
+              <div class="ospf__wire"><i data-ospf-packet></i><span data-ospf-msg>—</span></div>
+              <div class="ospf__router"><b>R2</b><small>Router ID 192.168.30.1</small></div>
+            </div>
+            <ol class="fsm" data-ospf-fsm>
+              <li data-s="down"><b>Down</b><span>Sin Hello</span></li>
+              <li data-s="init"><b>Init</b><span>Recibe Hello</span></li>
+              <li data-s="2way"><b>2-Way</b><span>Se ven mutuamente</span></li>
+              <li data-s="exstart"><b>ExStart</b><span>Maestro y esclavo</span></li>
+              <li data-s="exchange"><b>Exchange</b><span>Resúmenes de la base</span></li>
+              <li data-s="loading"><b>Loading</b><span>Pide lo que falta</span></li>
+              <li data-s="full"><b>Full</b><span>Bases sincronizadas</span></li>
+            </ol>
+            <p class="ospf__note" data-ospf-note aria-live="polite">Con OSPF, la vecindad llegó a FULL/DR en R1 y FULL/BDR en R2.</p>
+          </div>
+        </div>
+
+        <div class="hello" data-reveal data-hello>
+          <div class="hello__copy">
+            <span class="eyebrow eyebrow--light">Paquete OSPF Hello · capturado en Router0</span>
+            <h3>Cada campo cuenta algo</h3>
+            <p>Pasa el cursor o toca un campo para leer qué significa. El Hello se envía cada 10 s a 224.0.0.5, una dirección multicast reservada a los routers OSPF.</p>
+            <p class="hello__detail" data-hello-detail aria-live="polite">Selecciona un campo del paquete.</p>
+          </div>
+          <div class="hello__packet" role="group" aria-label="Campos del paquete Hello">
+            <div class="hello__layer"><span>IP</span>
+              <button type="button" data-hf="ipsrc"><small>Origen</small><b>10.0.0.1</b></button>
+              <button type="button" data-hf="ipdst" class="is-key"><small>Destino</small><b>224.0.0.5</b></button>
+              <button type="button" data-hf="ttl"><small>TTL</small><b>1</b></button>
+              <button type="button" data-hf="proto"><small>Protocolo</small><b>89</b></button>
+            </div>
+            <div class="hello__layer"><span>OSPF</span>
+              <button type="button" data-hf="ver"><small>Versión</small><b>2</b></button>
+              <button type="button" data-hf="type"><small>Tipo</small><b>1 · Hello</b></button>
+              <button type="button" data-hf="rid"><small>Router ID</small><b>192.168.10.1</b></button>
+              <button type="button" data-hf="area"><small>Área</small><b>0.0.0.0</b></button>
+              <button type="button" data-hf="mask"><small>Máscara</small><b>255.255.255.252</b></button>
+              <button type="button" data-hf="hello"><small>Hello</small><b>10 s</b></button>
+              <button type="button" data-hf="dead"><small>Dead</small><b>40 s</b></button>
+              <button type="button" data-hf="dr"><small>DR</small><b>10.0.0.2</b></button>
+              <button type="button" data-hf="bdr"><small>BDR</small><b>10.0.0.1</b></button>
+              <button type="button" data-hf="nbr"><small>Vecino</small><b>192.168.30.1</b></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cli-block cli-block--dark" data-reveal>
+          <div class="cli-block__copy"><span class="eyebrow eyebrow--light">R1 y R2 · CLI</span><h3>OSPFv2, proceso 1, área 0</h3><p>La sentencia <code>network</code> usa wildcard, no máscara: 0.0.0.255 para una /24 y 0.0.0.3 para el enlace /30. Las rutas estáticas IPv6 se mantuvieron.</p></div>
+          <pre aria-label="Comandos de configuración de OSPF"><code>! R1
+router ospf 1
+ network 192.168.10.0 0.0.0.255 area 0
+ network 10.0.0.0 0.0.0.3 area 0
+
+! R2
+router ospf 1
+ network 10.0.0.0 0.0.0.3 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+ network 192.168.30.0 0.0.0.255 area 0</code></pre>
+        </div>
+
+        <div class="qa-list" data-reveal>
+          <div class="qa-list__head"><span class="eyebrow eyebrow--light">Preguntas del reto</span><h3>Respuestas del informe</h3></div>
+          <details class="qa" open>
+            <summary><span>¿A qué dirección se envían los Hello de OSPF?</span><i aria-hidden="true">+</i></summary>
+            <p>A 224.0.0.5, una dirección multicast IPv4 reservada para los routers OSPF del enlace. El TTL de 1 impide que el Hello salga de ese enlace.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Cuántos comandos se agregaron en R1 para alcanzar LAN3, con rutas estáticas y con routing dinámico?</span><i aria-hidden="true">+</i></summary>
+            <p>Con rutas estáticas, dos: <code>ip route 192.168.30.0 255.255.255.0 10.0.0.2</code> y <code>ipv6 route 2001:DB8:ACAD:30::/64 2001:DB8:ACAD:100::2</code>. Con OSPFv2, R1 aprendió LAN3 por IPv4 sin ninguna ruta específica hacia 192.168.30.0/24: esa es la ventaja del routing dinámico al ampliar la red.</p>
+          </details>
+          <details class="qa">
+            <summary><span>¿Qué significan [110/2] y por qué el primero es 110?</span><i aria-hidden="true">+</i></summary>
+            <p>110 es la distancia administrativa predeterminada de OSPF y sirve para comparar sus rutas con las de otros mecanismos. El 2 es el costo acumulado que calculó OSPF hasta la red anunciada. No son direcciones IP ni cantidad de saltos escrita a mano.</p>
+          </details>
+        </div>
+
+        <div class="evidence-section evidence-section--dark" data-reveal>
+          <div class="evidence-section__head"><span class="eyebrow eyebrow--light">Evidencias</span><h3>LAN3 y OSPF en Packet Tracer</h3></div>
+          <div class="evidence-grid evidence-grid--t3" data-fig-grid="cr-c"></div>
+        </div>
+
+        <div class="pkt-download pkt-download--dark" data-reveal>
+          <div><span class="eyebrow eyebrow--light">Archivos de simulación</span><p>Los tres archivos del taller de capa de red, para abrir con Packet Tracer 9.0: la topología reconstruida, el reto con rutas estáticas y el reto con OSPF.</p></div>
+          <div class="pkt-download__links">
+            <a class="button button--light button--compact" href="assets/descargas/Taller_CapaRed_Montoya.pkt" download>Topología base ↓</a>
+            <a class="button button--light button--compact" href="assets/descargas/Taller_CapaRed_Reto_Estatico.pkt" download>Reto estático ↓</a>
+            <a class="button button--light button--compact" href="assets/descargas/Taller_CapaRed_Reto.pkt" download>Reto OSPF ↓</a>
+          </div>
+        </div>
+
+        <nav class="chapter-pager chapter-pager--dark" aria-label="Navegación entre capítulos"><a href="#fallas">← Seis fallas</a><a href="#conclusiones">Conclusiones →</a></nav>
+      </div>
+    </section>
+
+    <!-- ==============================
          Conclusiones
     ================================= -->
     <section class="chapter chapter--light" id="conclusiones" data-nav-title="Conclusiones" data-cut="both">
@@ -1186,6 +2225,7 @@ ip dhcp pool USUARIOS
             <h2>Conclusiones</h2>
             <p data-cut="first">Al cerrar el primer corte entendemos cómo se conectan los dispositivos, cómo viajan los datos y cómo se construye una red desde la teoría hasta Packet Tracer.</p>
             <p data-cut="second">Con los talleres del segundo corte relacionamos el funcionamiento de las capas con situaciones de una red real: cómo se encapsulan los datos, cómo se configura y se verifica una red con DHCP y cómo se protege la infraestructura.</p>
+            <p data-cut="third">Con los talleres del tercer corte aprendimos a identificar cada equipo con IPv4, a dividir una red en subredes y a comprobar con evidencia cómo un paquete cruza routers con rutas estáticas, IPv6 y OSPF.</p>
           </div>
         </header>
 
@@ -1227,9 +2267,29 @@ ip dhcp pool USUARIOS
           </div>
         </div>
 
+        <div class="concl" data-cut="third">
+          <div class="concl-stats" data-reveal data-concl-stats>
+            <div><b data-count="62">62</b><span>hosts útiles en una /26</span></div>
+            <div><b data-count="6">6</b><span>fallas diagnosticadas</span></div>
+            <div><b data-count="3">3</b><span>LAN conectadas con OSPF</span></div>
+            <div><b data-count="126">126</b><span>TTL tras cruzar dos routers</span></div>
+          </div>
+          <div class="concl-grid">
+            <article class="concl-item"><span class="concl-item__n">01</span><div><h3>Una dirección IPv4 son 32 bits</h3><p>Cuatro octetos de ocho bits con pesos 128, 64, 32, 16, 8, 4, 2 y 1. El primer octeto da la clase y los bloques 10/8, 172.16/12 y 192.168/16 son privados.</p><a class="concl-item__link" href="#estructura-ipv4">Estructura IPv4 <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">02</span><div><h3>La máscara separa la red del host</h3><p>El AND entre IP y máscara entrega la dirección de red; el número mágico (256 menos el octeto de la máscara) llega al mismo resultado y permite calcular broadcast, HostMin y HostMax.</p><a class="concl-item__link" href="#subredes">Máscaras y subredes <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">03</span><div><h3>Un switch une cables, no redes</h3><p>Con 192.168.49.130/26 el PC quedó en otra subred aunque estuviera en el mismo switch, y el ping falló. Pertenecer a la misma red lógica depende de IP y máscara, no del cable.</p><a class="concl-item__link" href="#taller-subredes">Taller 2 · punto 5 <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">04</span><div><h3>El TTL baja, la IP se queda, la MAC cambia</h3><p>Al cruzar R1 el TTL pasó de 255 a 254; las IP de origen y destino se conservaron y las MAC se reemplazaron en cada enlace. Eso conecta la capa 2 con la capa 3.</p><a class="concl-item__link" href="#capa-red">Simulador de enrutamiento <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">05</span><div><h3>DHCP asigna, APIPA improvisa</h3><p>Con las direcciones .33 a .37 excluidas, PC5 recibió 172.16.49.38. Sin servidor, un equipo cae en 169.254.x.x y solo puede hablar con vecinos del segmento.</p><a class="concl-item__link" href="#taller-subredes">Taller 2 · punto 7 <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">06</span><div><h3>Una ruta de ida no basta</h3><p>Sin la ruta de regreso en R2 el ping perdió los cuatro paquetes. Además, la ruta por defecto escondió la falta de una ruta específica hasta que se retiró.</p><a class="concl-item__link" href="#fallas">Laboratorio de fallas <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">07</span><div><h3>IPv6 cambia cómo se obtiene la dirección</h3><p>Con SLAAC, R1 anuncia el prefijo /64 y el PC completa el identificador a partir de su MAC (EUI-64). Sin <code>ipv6 unicast-routing</code>, el router no reenvía IPv6.</p><a class="concl-item__link" href="#capa-red">IPv6 y SLAAC <span aria-hidden="true">→</span></a></div></article>
+            <article class="concl-item"><span class="concl-item__n">08</span><div><h3>El routing dinámico escala mejor</h3><p>Para alcanzar LAN3 con rutas estáticas hubo que agregar dos comandos en R1; con OSPF, R1 la aprendió sin ninguna ruta específica (O 192.168.30.0/24 [110/2]).</p><a class="concl-item__link" href="#ospf">Reto OSPF <span aria-hidden="true">→</span></a></div></article>
+          </div>
+        </div>
+
         <aside class="concl-close" data-reveal>
           <p data-cut="first">Una red funciona porque cada capa, dispositivo y medio resuelve una parte distinta del problema. Entenderlas por separado es lo que permite diseñarla y diagnosticarla.</p>
           <p data-cut="second">Entender el modelo de capas no es solo teoría: es la base práctica del diagnóstico de fallas y del diseño de redes seguras.</p>
+          <p data-cut="third">Una red no funciona por tener cables conectados: funciona porque cada equipo sabe en qué red está, a quién entregar el paquete y cómo se regresa la respuesta.</p>
         </aside>
 
         <nav class="chapter-pager"><a href="#laboratorio">← Packet Tracer</a><a href="#evaluacion">Evaluación →</a></nav>
@@ -1333,6 +2393,13 @@ ip dhcp pool USUARIOS
           <article><span>04</span><h3>Proteger</h3><p>Aplicar medidas físicas y lógicas y reconocer riesgos como una red sin segmentación.</p></article>
         </div>
 
+        <div class="learning-summary" data-cut="third" data-reveal>
+          <article><span>01</span><h3>Calcular</h3><p>Convertir direcciones, aplicar máscaras con AND y obtener red, broadcast y rango de hosts, también con el número mágico.</p></article>
+          <article><span>02</span><h3>Configurar</h3><p>Asignar IPv4 e IPv6, activar interfaces, definir gateways, rutas estáticas, ruta por defecto, DHCP y OSPF.</p></article>
+          <article><span>03</span><h3>Verificar</h3><p>Usar ping, tracert, arp, show ip route y el modo Simulation para comprobar el recorrido de un paquete.</p></article>
+          <article><span>04</span><h3>Diagnosticar</h3><p>Distinguir una interfaz apagada, un gateway o máscara erróneos, una ruta faltante y un reenvío IPv6 desactivado.</p></article>
+        </div>
+
         <div class="references" data-reveal>
           <div class="references__head"><span class="eyebrow eyebrow--light">Fuentes del contenido</span><h3>Material académico suministrado</h3><p>La plataforma se construyó a partir de los documentos, talleres y presentaciones entregados para el proyecto.</p></div>
           <ol>
@@ -1345,6 +2412,10 @@ ip dhcp pool USUARIOS
             <li data-cut="second"><span>07</span><div><strong>Informe del taller: Cableado y configuración básica de una red en Cisco Packet Tracer</strong><p>Dos redes con DHCP, evidencias y pruebas de conectividad (formato APA 7).</p></div></li>
             <li data-cut="second"><span>08</span><div><strong>Presentación: Encapsulamiento, PDU y Seguridad en Infraestructura de Red</strong><p>Modelos OSI y TCP/IP, PDU por capa, desencapsulamiento, amenazas y buenas prácticas.</p></div></li>
             <li data-cut="second"><span>09</span><div><strong>Taller teórico-práctico: Encapsulamiento, PDU y Seguridad</strong><p>Preguntas, captura de tráfico y caso TecnoAndina, con su rúbrica de evaluación.</p></div></li>
+            <li data-cut="third"><span>10</span><div><strong>Presentación y guía: Direccionamiento y estructura IPv4</strong><p>Binario, clases, máscaras, AND, número mágico y prefijo personalizado según la cédula.</p></div></li>
+            <li data-cut="third"><span>11</span><div><strong>Informe: Taller práctico de direccionamiento y estructura IPv4 (cédulas 49 y 78)</strong><p>Seis partes con cálculos, práctica en Packet Tracer y preguntas de análisis (formato APA 7).</p></div></li>
+            <li data-cut="third"><span>12</span><div><strong>Informe grupal: Direccionamiento y estructura IPv4 en la práctica · Taller 2</strong><p>Subredes /24, /26 y /27, error de subred, DHCP, APIPA y cabecera IPv4 en Simulation.</p></div></li>
+            <li data-cut="third"><span>13</span><div><strong>Taller Packet Tracer 9.0: Capa de red, IPv4, IPv6 y routing, con su material de apoyo</strong><p>Rutas estáticas, SLAAC, seis fallas, LAN3 y OSPF; informe en formato APA 7.</p></div></li>
           </ol>
         </div>
 
